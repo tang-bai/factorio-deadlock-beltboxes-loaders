@@ -1,0 +1,89 @@
+# 版本更新后，自动在 GitHub Releases 里生成一个带模组 zip 的发布包
+#
+# 触发：push 到 master，或在 Actions 页面手动 Run workflow。
+# 行为：
+#   * 从 info.json 读取 name / version
+#   * 用 git archive 按 <name>_<version>/ 的结构打包（会按 .gitattributes 自动排除 .github/.gitattributes/.gitignore）
+#   * 如果 GitHub 上已经有 v<version> 这个 Release，就跳过 —— 幂等，同一版本反复 push 也不会报错
+#   * 否则创建 Release：标签 v<version>、附件是这个 zip、说明文字取自 changelog.txt 里对应版本的段落
+#
+# 它和 push.yml（发布到 Factorio mod 门户）是两个独立任务，任何一边失败都不影响另一边。
+
+name: GitHub Release
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: github-release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Read name and version from info.json
+        id: meta
+        run: |
+          set -euo pipefail
+          name=$(jq -r '.name' info.json)
+          version=$(jq -r '.version' info.json)
+          if [ -z "$name" ] || [ "$name" = "null" ] || [ -z "$version" ] || [ "$version" = "null" ]; then
+            echo "::error::info.json 里读不到 name/version"
+            exit 1
+          fi
+          echo "name=$name" >> "$GITHUB_OUTPUT"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "模组：$name　版本：$version"
+
+      - name: Build mod zip
+        run: |
+          set -euo pipefail
+          name='${{ steps.meta.outputs.name }}'
+          version='${{ steps.meta.outputs.version }}'
+          mkdir -p build
+          git archive --format=zip --prefix="${name}_${version}/" -o "build/${name}_${version}.zip" HEAD
+          ls -l "build/${name}_${version}.zip"
+          unzip -l "build/${name}_${version}.zip" | sed -n '1,8p'
+
+      - name: Create GitHub release with the mod zip
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          name='${{ steps.meta.outputs.name }}'
+          version='${{ steps.meta.outputs.version }}'
+          tag="v${version}"
+          zip="build/${name}_${version}.zip"
+
+          if gh release view "${tag}" > /dev/null 2>&1; then
+            echo "GitHub 上已存在 Release ${tag}，跳过。"
+            exit 0
+          fi
+
+          # Release 说明取 changelog.txt 里该版本的段落（从 Version: 行到下一个分隔线）
+          awk -v v="${version}" '
+            $0 ~ "^Version: " v "$" { found = 1; next }
+            found && $0 ~ /^-+$/ { exit }
+            found { print }
+          ' changelog.txt > release_notes.md
+          if [ ! -s release_notes.md ]; then
+            printf '完整更新日志见仓库里的 changelog.txt。\n' > release_notes.md
+          fi
+          echo "--- release notes ---"
+          cat release_notes.md
+
+          gh release create "${tag}" "${zip}" \
+            --target "${GITHUB_SHA}" \
+            --title "${tag}" \
+            --notes-file release_notes.md
+
+          echo "✅ 已创建 GitHub Release ${tag}，附件：${zip}"
