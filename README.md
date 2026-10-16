@@ -12,6 +12,12 @@ Deadlock 的堆叠机与紧凑装卸机（DSB）
 
 这里只说明本仓库相对上游 [shanemadden/factorio-deadlock-beltboxes-loaders](https://github.com/shanemadden/factorio-deadlock-beltboxes-loaders) 的改动。
 
+版本 2.7.0：首个 CN 发行版
+------
+
+* 面向 mod 门户发布的第一个版本，版本线延续上游（2.6.x → 2.7.0），汇总下面 2.6.1–2.6.3 的全部改动：Bob's Logistics 传送带等级支持、廉价升级配方、完整简体中文、模组内部名称改为 `deadlock-beltboxes-loaders-CN`。
+* 仓库带有 GitHub Actions 自动发布流程（[\.github/workflows/push.yml](.github/workflows/push.yml)）：**每次 push 都会读取 info.json 自动上传到 mod 门户**，所以发新版本前必须先在 info.json 升版本号并在 changelog.txt 里补上同版本号的条目（门户不允许同一版本重复上传）。
+
 版本 2.6.3：改为独立的 CN 版
 ------
 
