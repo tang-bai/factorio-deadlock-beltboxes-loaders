@@ -1,12 +1,144 @@
-on: push
+# 发布到 Factorio mod 门户
+#
+# 说明：原先使用的第三方 Action（shanemadden/factorio-mod-portal-publish）基于 Debian 9(stretch)
+# 的 Docker 镜像，而 stretch 已经 EOL，镜像里的 apt-get update 会 404，导致每次 push 的构建都失败。
+# 这里改成不依赖任何第三方 Action、也不依赖 Docker：直接调用官方 API（API key 认证）上传。
+#
+# 触发条件：
+#   * 推送到 master 分支（会先判断该版本是否已发布，已发布则跳过，任务仍然是绿灯）
+#   * 也可以在 Actions 页面手动 Run workflow
+#
+# 需要的仓库密钥（Settings → Secrets and variables → Actions）：
+#   FACTORIO_API_KEY —— factorio.com 个人资料页（Profile）里的 “Mod portal API key”
+#
+# 流程：读 info.json 的 name/version → 校验 changelog 有该版本 → 查门户是否已有该版本
+#       → git archive 打包 → init_upload 取上传地址 → 上传 zip。
+
 name: Publish
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+concurrency:
+  group: mod-portal-publish
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
 jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@master
-    - name: mod-portal-publish
-      uses: shanemadden/factorio-mod-portal-publish@master
-      env:
-        FACTORIO_PASSWORD: ${{ secrets.FACTORIO_PASSWORD }}
-        FACTORIO_USER: ${{ secrets.FACTORIO_USER }}
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Read name and version from info.json
+        id: meta
+        run: |
+          set -euo pipefail
+          name=$(jq -r '.name' info.json)
+          version=$(jq -r '.version' info.json)
+          if [ -z "$name" ] || [ "$name" = "null" ] || [ -z "$version" ] || [ "$version" = "null" ]; then
+            echo "::error::info.json 里读不到 name/version"
+            exit 1
+          fi
+          echo "name=$name" >> "$GITHUB_OUTPUT"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "zip=${name}_${version}.zip" >> "$GITHUB_OUTPUT"
+          echo "模组：$name　版本：$version"
+
+      - name: Check changelog has this version
+        run: |
+          set -euo pipefail
+          version='${{ steps.meta.outputs.version }}'
+          if ! tr -d '\r' < changelog.txt | grep -qE "^Version: ${version}$"; then
+            echo "::error::changelog.txt 里没有 “Version: ${version}” 条目,门户会拒绝上传"
+            exit 1
+          fi
+          echo "changelog.txt 已包含版本 ${version}"
+
+      - name: Check whether this version is already published
+        id: check
+        env:
+          API_KEY: ${{ secrets.FACTORIO_API_KEY }}
+        run: |
+          set -euo pipefail
+          if [ -z "${API_KEY}" ]; then
+            echo "::error::未配置仓库密钥 FACTORIO_API_KEY（factorio.com → Profile → Mod portal API key）"
+            exit 1
+          fi
+          name='${{ steps.meta.outputs.name }}'
+          version='${{ steps.meta.outputs.version }}'
+          code=$(curl -sS -o /tmp/mod.json -w '%{http_code}' "https://mods.factorio.com/api/mods/${name}/full")
+          if [ "${code}" = "200" ] && jq -e --arg v "${version}" '[.releases[]?.version] | index($v)' /tmp/mod.json > /dev/null; then
+            echo "门户上已有 ${name} ${version}，跳过发布。"
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "门户查询返回 ${code}，准备上传 ${name} ${version}。"
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build mod zip
+        if: steps.check.outputs.skip != 'true'
+        run: |
+          set -euo pipefail
+          name='${{ steps.meta.outputs.name }}'
+          version='${{ steps.meta.outputs.version }}'
+          zip='${{ steps.meta.outputs.zip }}'
+          mkdir -p build
+          # git archive 只打包已提交的文件，并会按 .gitattributes 的 export-ignore
+          # 自动排除 .gitattributes / .gitignore / .github
+          git archive --format=zip --prefix="${name}_${version}/" -o "build/${zip}" HEAD
+          ls -l "build/${zip}"
+          unzip -l "build/${zip}" | sed -n '1,15p'
+
+      - name: Upload to the mod portal
+        if: steps.check.outputs.skip != 'true'
+        env:
+          API_KEY: ${{ secrets.FACTORIO_API_KEY }}
+        run: |
+          set -euo pipefail
+          name='${{ steps.meta.outputs.name }}'
+          version='${{ steps.meta.outputs.version }}'
+          zip='build/${{ steps.meta.outputs.zip }}'
+
+          echo "请求上传地址…"
+          init=$(curl -sS -X POST \
+            -H "Authorization: Bearer ${API_KEY}" \
+            -F "mod=${name}" \
+            "https://mods.factorio.com/api/v2/mods/releases/init_upload")
+          echo "init_upload 响应：${init}"
+
+          url=$(echo "${init}" | jq -r '.upload_url // empty')
+          if [ -z "${url}" ]; then
+            echo "::error::没拿到 upload_url，上传中止（若是全新模组名，请先在门户上用同一账号创建该模组）"
+            exit 1
+          fi
+
+          echo "上传 ${zip} …"
+          result=$(curl -sS -X POST \
+            -H "Authorization: Bearer ${API_KEY}" \
+            -F "file=@${zip};type=application/zip" \
+            "${url}")
+          echo "上传响应：${result}"
+
+          # 响应里明确报错就直接失败；成功响应的格式可能会变，所以再回查门户确认版本真的上去了
+          if echo "${result}" | jq -e '.success == false' > /dev/null 2>&1; then
+            echo "::error::上传被拒绝，见上面的响应"
+            exit 1
+          fi
+
+          for attempt in 1 2 3 4 5; do
+            sleep 4
+            code=$(curl -sS -o /tmp/mod2.json -w '%{http_code}' "https://mods.factorio.com/api/mods/${name}/full")
+            if [ "${code}" = "200" ] && jq -e --arg v "${version}" '[.releases[]?.version] | index($v)' /tmp/mod2.json > /dev/null; then
+              echo "✅ 发布成功：${name} ${version}"
+              exit 0
+            fi
+            echo "第 ${attempt} 次回查：门户返回 ${code}，还没看到 ${version}"
+          done
+          echo "::error::上传后没能在门户上查到 ${version}，请检查上面的响应"
+          exit 1
