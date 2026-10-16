@@ -70,7 +70,7 @@ Bob's Logistics 会重新定义各级传送带的速度，并额外提供「基�
 改完之后重新打成 `<模组名>_<版本>.zip`（zip 内要带一层 `<模组名>_<版本>/` 目录，名字直接取自 `info.json`），放进 `%APPDATA%\Factorio\mods\` 即可。在仓库根目录用 PowerShell 执行：
 
 ~~~~
-$info  = Get-Content info.json -Raw | ConvertFrom-Json
+$info  = Get-Content info.json -Raw -Encoding UTF8 | ConvertFrom-Json   # Windows PowerShell 5.1 必须带 -Encoding UTF8，否则中文会乱码
 $base  = "$($info.name)_$($info.version)"
 $stage = "$env:TEMP\dsb\$base"
 Remove-Item -Recurse -Force "$env:TEMP\dsb" -ErrorAction SilentlyContinue

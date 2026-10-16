@@ -4,6 +4,7 @@ Date: 16. 10. 2026
   变更:
     - 改为独立的 CN 版：模组内部名称由 deadlock-beltboxes-loaders 改为 deadlock-beltboxes-loaders-CN，info.json 的 name 与 title 同步更新，图形/音效路径（__modname__）、语言文件里的模组名/描述键名、以及两个迁移文件的文件名也一并改名
     - 注意：其它模组中针对旧名称的判断（例如 Factorio-Tiberium 的 mods["deadlock-beltboxes-loaders"]）不再生效，这类基于模组名的整合会失效；调用本模组 API（全局 deadlock 表）的模组不受影响
+    - info.json 的 description 改为中文（与 locale/zh-CN 的 [mod-description] 统一为同一段文字），同时 locale/en 里补上英文的 [mod-description]，避免英文环境下显示中文简介
     - 已有存档可以直接继续使用（原型名称没有变化），首次加载会提示模组列表有变动
 ---------------------------------------------------------------------------------------------------
 Version: 2.6.2
