@@ -1,248 +1,256 @@
 ---------------------------------------------------------------------------------------------------
+Version: 2.6.3
+Date: 16. 10. 2026
+  变更:
+    - 改为独立的 CN 版：模组内部名称由 deadlock-beltboxes-loaders 改为 deadlock-beltboxes-loaders-CN，info.json 的 name 与 title 同步更新，图形/音效路径（__modname__）、语言文件里的模组名/描述键名、以及两个迁移文件的文件名也一并改名
+    - 注意：其它模组中针对旧名称的判断（例如 Factorio-Tiberium 的 mods["deadlock-beltboxes-loaders"]）不再生效，这类基于模组名的整合会失效；调用本模组 API（全局 deadlock 表）的模组不受影响
+    - 已有存档可以直接继续使用（原型名称没有变化），首次加载会提示模组列表有变动
+---------------------------------------------------------------------------------------------------
 Version: 2.6.2
 Date: 16. 10. 2026
-  Changes:
-    - Added a complete Simplified Chinese (zh-CN) localisation, following the wording of the community Chinese translation pack, and covering the new Bob's Logistics tiers
+  变更:
+    - 新增完整的简体中文（zh-CN），用词沿用社区汉化包的习惯译法，并覆盖新增的 Bob's Logistics 各等级
+    - 汉化 README.md、description.md 与 changelog.txt
 ---------------------------------------------------------------------------------------------------
 Version: 2.6.1
 Date: 16. 10. 2026
-  Changes:
-    - Added Bob's Logistics support: loaders and beltboxes matching Bob's belt tiers, running at Bob's belt speeds, including Bob's tier-0 basic belt and the ultimate belt (and the turbo belt when Space Age is not installed)
-    - All tiers are now linked with next_upgrade, so the upgrade planner and fast replace walk through the whole chain from the basic belt up to the ultimate belt
-    - One tier upgrade now costs the previous tier's loader plus 2 iron plates and 2 iron gear wheels (see prototypes/bob_tiers.lua to change the cost)
+  变更:
+    - 新增 Bob's Logistics 支持：为 Bob 的传送带等级生成装卸机与堆叠机，速度与 Bob 的传送带完全一致，包括 T0 基础传送带和终极传送带（未安装 Space Age 时还包括涡轮传送带）
+    - 所有等级都设置了 next_upgrade，升级规划器与快速替换可以从基础带一路升到终极带
+    - 每一级升级的配方改为「上一级装卸机 ×1 + 铁板 ×2 + 铁齿轮 ×2」（想调整成本见 prototypes/bob_tiers.lua）
 ---------------------------------------------------------------------------------------------------
 Version: 2.6.0
 Date: 06. 01. 2025
-  Changes:
-    - Corrected the recipe for T4 loaders/beltboxes to use T3 instead of T2
-    - Allow T3/T4 loaders/beltboxes to be made in foundaries when Space Age is present, matching the belts of that tier
+  变更:
+    - 修正 T4 装卸机/堆叠机的配方，改为使用 T3 而不是 T2
+    - 安装 Space Age 时，允许 T3/T4 装卸机/堆叠机在铸造厂生产，与该等级传送带的材料保持一致
 ---------------------------------------------------------------------------------------------------
 Version: 2.5.0
 Date: 23. 10. 2024
-  Changes:
-    - Updated for Factorio 2.0
-    - Added compatibility with Space Age, a 4th tier of loaders/beltboxes will be added if Space Age is active
-    - Turbo loaders/beltboxes are currently only localized in English, PRs with translations are welcome!
-    - Removed the 'low' graphics as `hr_version` as the low/high split has been removed from the game
+  变更:
+    - 适配 Factorio 2.0
+    - 新增对 Space Age 的兼容：安装 Space Age 时会增加第 4 档装卸机/堆叠机
+    - 涡轮装卸机/堆叠机目前只有英文文本，欢迎提交其它语言的翻译！
+    - 移除作为 `hr_version` 的 'low' 图形，因为游戏已经取消了低清/高清的划分
 ---------------------------------------------------------------------------------------------------
 Version: 2.4.2
 Date: 09. 05. 2021
-  Changes:
-    - Remove old compatibility workarounds from build event code, and add an event filter to improve performance.
+  变更:
+    - 移除建造事件代码里过时的兼容处理，并加入事件过滤以提高性能。
 ---------------------------------------------------------------------------------------------------
 Version: 2.4.1
 Date: 13. 01. 2021
-  Changes:
-    - Remove check for whether loaders are from this mod for snapping to improve compatibility with other mods. Reminder: snapping options can be disabled in settings if desired.
+  变更:
+    - 移除「只对来自本模组的装卸机做吸附」的限制，以提高与其它模组的兼容性。提醒：吸附相关选项可以在设置里关闭。
 ---------------------------------------------------------------------------------------------------
 Version: 2.4.0
 Date: 24. 11. 2020
-  Changes:
-    - Updated for Factorio 1.1.0, courtesy of billbo99
+  变更:
+    - 适配 Factorio 1.1.0，感谢 billbo99
 ---------------------------------------------------------------------------------------------------
 Version: 2.3.7
 Date: 31. 10. 2020
-  Bugfixes:
-    - Fix multiplication of fuel value for items with non-whole-number values, courtesy of billbo99
+  修复:
+    - 修复非整数燃料值的相乘错误，感谢 billbo99
 ---------------------------------------------------------------------------------------------------
 Version: 2.3.6
 Date: 26. 07. 2020
-  Bugfixes:
-    - Use icons property instead of icon when both are present and fix bad size assumption, courtesy of kirazy on GitHub
+  修复:
+    - 当 icon 与 icons 同时存在时改用 icons，并修正错误的尺寸假设，感谢 GitHub 上的 kirazy
 ---------------------------------------------------------------------------------------------------
 Version: 2.3.5
 Date: 11. 04. 2020
-  Bugfixes:
-    - Fix potential desync due to unneeded global variables
+  修复:
+    - 修复因多余的全局变量而可能导致的 desync
 ---------------------------------------------------------------------------------------------------
 Version: 2.3.4
 Date: 22. 03. 2020
-  Changes:
-    - Thanks to shelaf for adding a Japanese translation
+  变更:
+    - 感谢 shelaf 添加日语翻译
 ---------------------------------------------------------------------------------------------------
 Version: 2.3.3
 Date: 07. 03. 2020
-  Bugfixes:
-    - Fix upgrade planner properties for new entity type
+  修复:
+    - 修复新实体类型的升级规划器属性
 ---------------------------------------------------------------------------------------------------
 Version: 2.3.2
 Date: 01. 03. 2020
-  Changes:
-    - Allow stacking of rail items, thanks to billbo99
+  变更:
+    - 允许对铁路物品进行堆叠，感谢 billbo99
 ---------------------------------------------------------------------------------------------------
 Version: 2.3.1
 Date: 17. 02. 2020
-  Bugfixes:
-    - Fix a crash when a base item for a stacked item is deleted
+  修复:
+    - 修复堆叠物品的基础物品被删除时导致的崩溃
 ---------------------------------------------------------------------------------------------------
 Version: 2.3.0
 Date: 25. 01. 2020
-  Changes:
-    - Support 0.18 thanks to billbo99
-    - Loaders changed to use type = "loader-1x1"
+  变更:
+    - 支持 0.18，感谢 billbo99
+    - 装卸机改用 type = "loader-1x1"
 ---------------------------------------------------------------------------------------------------
 Version: 2.2.3
 Date: 14. 12. 2019
-  Changes:
-    - Use an item's localised_name for stacked item name generation to match the underlying item if the locale file has been overridden for it
+  变更:
+    - 生成堆叠物品名称时改用物品自身的 localised_name，这样当某个物品的语言文件被覆盖时也能与它保持一致
 ---------------------------------------------------------------------------------------------------
 Version: 2.2.2
 Date: 28. 09. 2019
-  Changes:
-    - Attempt to prevent an failure to load when a deleted item is checked for stacking density
+  变更:
+    - 尽量避免在检查已删除物品的堆叠密度时加载失败
 ---------------------------------------------------------------------------------------------------
 Version: 2.2.1
 Date: 25. 08. 2019
-  Changes:
-    - Improves loader snapping for adjacent loaders and inventory snapping belt hints - thanks to meonester on GitHub
-    - When auto-unstacking is enabled, automatically unstack items gained via mining an entity - thanks to Doublespin on GitHub
-    - Add stack density options for more powers of 2 instead of 10; reminder to understand the maximum stack size implications of these settings; a stack size of 128 will drastically cut the amount of items that can be stored in a train or chest for items that stack to 200.
+  变更:
+    - 改进相邻装卸机之间的吸附，以及面对容器时的传送带提示——感谢 GitHub 上的 meonester
+    - 开启自动拆堆后，挖掉实体获得的堆叠物品也会自动拆开——感谢 GitHub 上的 Doublespin
+    - 堆叠密度选项改为更多 2 的幂次而不是 10 的幂次；请注意这些设置对最大堆叠数的影响：对于堆叠数为 200 的物品，堆叠数设为 128 会大幅减少火车或箱子能存放的物品数量。
 ---------------------------------------------------------------------------------------------------
 Version: 2.2.0
 Date: 08. 06. 2019
-  Changes:
-    - Thanks to Linver for adding an Italian translation.
+  变更:
+    - 感谢 Linver 添加意大利语翻译。
   API:
-    - NEW: deadlock.destroy_stack(). This deletes the stacked version of an item, all recipes which use it, and all tech unlocks for those recipes.
-    - NEW: deadlock.destroy_vanilla_stacks(). This deletes all the vanilla stacked items and all references to them.
-    - deadlock.add_stack() now has an optional extra parameter for specifying mipmap level - this is only ever used if you supply your own icon for the stack.
-    - Added warnings in the standard log when deprecated legacy functions are used and a hint to use an alternative.
-    - Moved vanilla items-per-tier lists into shared data.
-    - Moved item/recipe order meta-tables into shared data.
-    - Moved player hand unstacking call out of shared data and into data-final-fixes (to prevent repetitions).
+    - 新增：deadlock.destroy_stack()。删除某个物品的堆叠版本、所有使用它的配方，以及这些配方的全部科技解锁。
+    - 新增：deadlock.destroy_vanilla_stacks()。删除所有原版堆叠物品及其全部引用。
+    - deadlock.add_stack() 增加一个可选参数用于指定 mipmap 层级——只有你自己提供堆叠图标时才会用到。
+    - 使用已弃用的旧函数时会在标准日志里给出警告，并提示替代方案。
+    - 把原版「每档包含哪些物品」的列表移到共享数据里。
+    - 把物品/配方的排序元表移到共享数据里。
+    - 把玩家手动拆堆的调用从共享数据移到 data-final-fixes（避免重复调用）。
 ---------------------------------------------------------------------------------------------------
 Version: 2.1.13
 Date: 02. 06. 2019
-  Changes:
-    - Added Russian translation courtesy of JohnTheCoolingFan on GitHub
+  变更:
+    - 添加俄语翻译，感谢 GitHub 上的 JohnTheCoolingFan
 ---------------------------------------------------------------------------------------------------
 Version: 2.1.12
 Date: 13. 05. 2019
-  Changes:
-    - Normalize beltbox and stack recipe speeds to 1/2/3 at vanilla speeds
+  变更:
+    - 把堆叠机的合成速度与堆叠配方时间在原版速度下归一化为 1/2/3
 ---------------------------------------------------------------------------------------------------
 Version: 2.1.11
 Date: 02. 05. 2019
-  Changes:
-    - Update for character name changes in 0.17.35
+  变更:
+    - 适配 0.17.35 中的角色名称变更
 ---------------------------------------------------------------------------------------------------
 Version: 2.1.10
 Date: 13. 04. 2019
-  Changes:
-    - Change to using new emissions_per_minute parameter for pollution values
+  变更:
+    - 污染值改用新的 emissions_per_minute 参数
 ---------------------------------------------------------------------------------------------------
 Version: 2.1.9
 Date: 12. 04. 2019
-  Changes:
-    - Improved tint mask graphics
+  变更:
+    - 改进染色遮罩（tint mask）图形
 ---------------------------------------------------------------------------------------------------
 Version: 2.1.8
 Date: 10. 04. 2019
-  Bugfixes:
-    - Updated beltbox render order to fix occasional flickering issues
+  修复:
+    - 更新堆叠机的渲染顺序，修复偶发的闪烁问题
 ---------------------------------------------------------------------------------------------------
 Version: 2.1.7
 Date: 06. 04. 2019
-  Changes:
-    - Re-added optional dependency on ReStack
-    - Added new data stage helper function to the API to get the effective stack size for each item without having to dig into recipes, since it can now vary based on settings and the items themselves
+  变更:
+    - 重新加入对 ReStack 的可选依赖
+    - API 新增一个 data 阶段的辅助函数，用来获取每个物品的有效堆叠数，不必再去翻配方——因为现在它会随设置和物品本身而变化
 ---------------------------------------------------------------------------------------------------
 Version: 2.1.6
 Date: 01. 04. 2019
-  Changes:
-    - Added a startup option to set a stack size other than 5
-    - Attempted to fix potential situations where recipes added by third party mods weren't unlocked for existing saves
+  变更:
+    - 新增启动选项，可以把堆叠数设为 5 以外的值
+    - 尝试修复第三方模组添加的配方在已有存档中未被解锁的情况
 ---------------------------------------------------------------------------------------------------
 Version: 2.1.5
 Date: 31. 03. 2019
-  Changes:
-    - Update some stacked item attributes late in the loading process to account for other mods' changes
-    - Removed optional dependency on bobplates that's no longer needed
+  变更:
+    - 在加载后期更新部分堆叠物品的属性，以反映其它模组的改动
+    - 移除已经不再需要的 bobplates 可选依赖
 ---------------------------------------------------------------------------------------------------
 Version: 2.1.4
 Date: 30. 03. 2019
-  Bugfixes:
-    - Fix recipe icon generation for items with 128 pixel icons
+  修复:
+    - 修复 128 像素图标物品的配方图标生成
 ---------------------------------------------------------------------------------------------------
 Version: 2.1.3
 Date: 25. 03. 2019
-  Changes:
-    - Added French translation courtesy of Krysh Nar on GitHub
+  变更:
+    - 添加法语翻译，感谢 GitHub 上的 Krysh Nar
 ---------------------------------------------------------------------------------------------------
 Version: 2.1.2
 Date: 24. 03. 2019
-  Changes:
-    - Update masks with corrected texture
+  变更:
+    - 更新遮罩图形为修正后的贴图
 ---------------------------------------------------------------------------------------------------
 Version: 2.1.1
 Date: 24. 03. 2019
-  Changes:
-    - Drop pollution on beltboxes to bring it in line with the intended pollution amount.
-    - Re-add fast-replaceable-no-build-while-moving flag to loaders.
+  变更:
+    - 降低堆叠机的污染，使其符合预期的排污量。
+    - 重新为装卸机加回 fast-replaceable-no-build-while-moving 标记。
 ---------------------------------------------------------------------------------------------------
 Version: 2.1.0
 Date: 23. 03. 2019
-  Changes:
-    - Brand new graphics for beltboxes and loaders which match the 0.17 belt style better.
-    - There is a new mod setting to turn off the alt-mode recipe icon shown on beltboxes.
+  变更:
+    - 为堆叠机和装卸机换上全新图形，更贴合 0.17 的传送带风格。
+    - 新增一个模组设置，可以关闭堆叠机在 alt 模式下显示的配方图标。
 ---------------------------------------------------------------------------------------------------
 Version: 2.0.10
 Date: 19. 03. 2019
-  Changes:
-    - Add optional dep of bobplates because of the numerous changes it makes to vanilla items
-    - Alter localized name of the tier 1 beltbox to make more sense alongside a tier named "Basic"
+  变更:
+    - 加入 bobplates 可选依赖，因为它对原版物品做了大量修改
+    - 调整第 1 档堆叠机的本地化名称，使其与名为 "Basic" 的档位并列时更合理
 ---------------------------------------------------------------------------------------------------
 Version: 2.0.9
 Date: 14. 03. 2019
-  Changes:
-    - Update beltbox emission attributes for new format in Factorio 0.17.12 (requires this version)
-    - Split loaders and beltboxes into their own subgroups
-    - Add options to split loaders and beltboxes into strict fast replace groups
+  变更:
+    - 按 Factorio 0.17.12 的新格式更新堆叠机的排污属性（需要该版本）
+    - 把装卸机和堆叠机拆到各自独立的子分组
+    - 新增选项，可把装卸机和堆叠机放进各自独立的严格快速替换组
 ---------------------------------------------------------------------------------------------------
 Version: 2.0.8
 Date: 10. 03. 2019
-  Changes:
-    - Alter the way the entity tables are created for loaders to be safe if the vanilla loaders have been changed - fixes conflict with Loader Redux
-    - Move loaders to the transport-belt fast replace group, matching beltboxes
+  变更:
+    - 改变装卸机实体表的生成方式，使其在原版装卸机被修改时也安全——修复与 Loader Redux 的冲突
+    - 把装卸机移入传送带的快速替换组，与堆叠机保持一致
 ---------------------------------------------------------------------------------------------------
 Version: 2.0.7
 Date: 06. 03. 2019
-  Changes:
-    - Add a mechanism to the snapping logic to only work on loaders added by this mod
+  变更:
+    - 给吸附逻辑加上限制，使其只对本模组添加的装卸机生效
 ---------------------------------------------------------------------------------------------------
 Version: 2.0.6
 Date: 05. 03. 2019
-  Changes:
-    - Set the auto-unstack option back to disabled by default, those who prefer it can enable in settings
-    - Add upgrade relationships between loaders and beltboxes for the base upgrade planner tool
+  变更:
+    - 自动拆堆选项恢复为默认关闭，喜欢它的玩家可以在设置里开启
+    - 为基础游戏自带的升级规划器添加装卸机与堆叠机之间的升级关系
 ---------------------------------------------------------------------------------------------------
 Version: 2.0.5
 Date: 04. 03. 2019
-  Bugfixes:
-    - Fix error in tech dependencies when beltboxes are disabled
+  修复:
+    - 修复关闭堆叠机时科技依赖报错的问题
 ---------------------------------------------------------------------------------------------------
 Version: 2.0.4
 Date: 03. 03. 2019
-  Changes:
-    - Set each stacking tech to require the prior level
+  变更:
+    - 让每个堆叠科技都要求上一级
 ---------------------------------------------------------------------------------------------------
 Version: 2.0.3
 Date: 03. 03. 2019
-  Bugfixes:
-    - Allow for belts with old-style belt end animations in addition to the new belt_animation_set, fixing compatibility with FactorioExtended-Plus
+  修复:
+    - 除新的 belt_animation_set 之外，也支持使用旧式传送带末端动画的传送带，修复与 FactorioExtended-Plus 的兼容性
 ---------------------------------------------------------------------------------------------------
 Version: 2.0.2
 Date: 02. 03. 2019
-  Bugfixes:
-    - Fix stacking of formerly raw wood
+  修复:
+    - 修复原本是原木（raw wood）的物品无法堆叠的问题
 ---------------------------------------------------------------------------------------------------
 Version: 2.0.1
 Date: 02. 03. 2019
-  Changes:
-    - Fix info.json version number causing odd display in mod portal
+  变更:
+    - 修正 info.json 里的版本号，避免 mod 门户显示异常
 ---------------------------------------------------------------------------------------------------
 Version: 2.0.0
 Date: 02. 03. 2019
-  Changes:
-    - Initial release - combines functionality of DeadlockLoaders and DeadlockStacking (if you don't want one or the other, disable them in options)
-    - If you have an existing save, you also need the updated versions of the old mods for the first load - please see the mod portal for instructions if you have issues
+  变更:
+    - 首次发布——合并了 DeadlockLoaders 与 DeadlockStacking 的功能（如果你只想要其中之一，可以在选项里关闭）
+    - 如果你有旧存档，第一次加载时还需要旧模组的更新版本——遇到问题请查看 mod 门户上的说明

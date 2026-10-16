@@ -5,12 +5,21 @@ Deadlock 的堆叠机与紧凑装卸机（DSB）
 
 如果你是一名模组作者，可以让 DSB 自动为你自己模组里的物品生成堆叠版本。DSB API 的说明见下文。
 
-> 本仓库是 DSB 的中文分支（fork），新增了 **Bob's Logistics 支持**和**简体中文**，改动明细见下面的「本分支的改动」一节。本节以下的内容是上游原有的模组 API 文档，未作改动。
+> 本仓库是 DSB 的中文分支（fork），以独立的模组名 **`deadlock-beltboxes-loaders-CN`** 发布，新增了 **Bob's Logistics 支持**和**简体中文**，改动明细见下面的「本分支的改动」一节。本节以下的内容是上游原有的模组 API 文档，未作改动。
 
 本分支的改动
 ==========================
 
 这里只说明本仓库相对上游 [shanemadden/factorio-deadlock-beltboxes-loaders](https://github.com/shanemadden/factorio-deadlock-beltboxes-loaders) 的改动。
+
+版本 2.6.3：改为独立的 CN 版
+------
+
+* **模组内部名称改为 `deadlock-beltboxes-loaders-CN`**（[info.json](info.json) 的 `name`，标题加上 `(CN)`），这样可以作为一个独立模组发布，不与上游同名冲突。
+* 需要一起改名的地方都已处理：4 个 Lua 文件里共 26 处 `__deadlock-beltboxes-loaders__` 资源路径、`locale/zh-CN` 里的 `[mod-name]`/`[mod-description]` 键名、`migrations/` 里两个带模组名前缀的迁移文件。
+* **代价（重要）**：其它模组里针对旧名称的条件判断不再生效，例如 Factorio-Tiberium 的 `if mods["deadlock-beltboxes-loaders"] then`（为钛矿物品生成堆叠配方）——改名后就失效了。调用本模组 API（全局 `deadlock` 表）的模组不受影响。想让这些模组继续生效，需要它们自己兼容新名称，或者你给它们打补丁。
+* **存档**：原型名称没有变化，已有存档可以继续使用；首次加载会提示模组列表有变动（旧模组被移除、新模组加入）。
+* 打包文件名与 zip 内目录名随之变为 `deadlock-beltboxes-loaders-CN_<版本>`。
 
 版本 2.6.1：支持 Bob's Logistics
 ------
@@ -47,7 +56,8 @@ Bob's Logistics 会重新定义各级传送带的速度，并额外提供「基�
 ------
 
 * **新增 [locale/zh-CN/deadlock-beltboxes-loaders.cfg](locale/zh-CN/deadlock-beltboxes-loaders.cfg)**：本模组自带完整简体中文，覆盖实体/物品/配方名、实体说明、科技名与说明、全部设置项（名称与说明）、模组名与描述。用词沿用社区汉化包 `chinese` 的习惯译法（简洁装卸机、堆叠机、平分解压、堆叠比例……），并补上汉化包没有的涡轮档、Bob 两档，以及汉化包缺失的两条开关说明。装不装汉化包都会显示中文；同时因为本模组加载在汉化包之后，同名的键以本模组的文本为准（两者文本一致）。
-* **[changelog.txt](changelog.txt)**、**[description.md](description.md)** 同步更新。
+* **[changelog.txt](changelog.txt)**、**[description.md](description.md)**（英文原文另存为 [description.en.md](description.en.md)）与本文档 [README.md](README.md) 一并汉化，英文 README 原文另存为 [README.en.md](README.en.md)。
+* **[info.json](info.json)**：`description` 写明内置 Bob's Logistics 支持与简体中文，`author` 加上本分支维护者。
 
 以上改动如何验证
 ------
@@ -57,11 +67,11 @@ Bob's Logistics 会重新定义各级传送带的速度，并额外提供「基�
 自行打包 / 重新打包
 ------
 
-改完之后重新打成 `deadlock-beltboxes-loaders_<版本>.zip`（zip 内要带一层 `deadlock-beltboxes-loaders_<版本>/` 目录），放进 `%APPDATA%\Factorio\mods\` 即可。在仓库根目录用 PowerShell 执行：
+改完之后重新打成 `<模组名>_<版本>.zip`（zip 内要带一层 `<模组名>_<版本>/` 目录，名字直接取自 `info.json`），放进 `%APPDATA%\Factorio\mods\` 即可。在仓库根目录用 PowerShell 执行：
 
 ~~~~
-$ver   = (Get-Content info.json -Raw | ConvertFrom-Json).version
-$base  = "deadlock-beltboxes-loaders_$ver"
+$info  = Get-Content info.json -Raw | ConvertFrom-Json
+$base  = "$($info.name)_$($info.version)"
 $stage = "$env:TEMP\dsb\$base"
 Remove-Item -Recurse -Force "$env:TEMP\dsb" -ErrorAction SilentlyContinue
 New-Item -ItemType Directory -Path $stage | Out-Null
@@ -87,7 +97,7 @@ $archive.Dispose(); $zipStream.Dispose()
 步骤 1
 ------
 
-在你模组的 **info.json** 中把 “?deadlock-beltboxes-loaders” 加为可选依赖。例如：
+在你模组的 **info.json** 中把 “?deadlock-beltboxes-loaders-CN” 加为可选依赖（想同时兼容上游原版，就把 `"?deadlock-beltboxes-loaders"` 也一起写上）。例如：
 
 ~~~~
 {
@@ -97,7 +107,7 @@ $archive.Dispose(); $zipStream.Dispose()
   "author": "Deadlock989",
   "contact": "",
   "homepage": "",
-  "dependencies": ["base >= 0.17.0", "?deadlock-beltboxes-loaders"],
+  "dependencies": ["base >= 0.17.0", "?deadlock-beltboxes-loaders-CN"],
   "description": "Some small quality of life adjustments.",
   "factorio_version": "0.17"
 }
@@ -226,4 +236,4 @@ deadlock.add_tier({
 
 如果遇到问题、自己尝试解决后仍然卡住，请到 [Factorio 论坛帖](https://forums.factorio.com/viewtopic.php?f=94&t=57264)联系我们，附上错误信息并贴出你的代码——光凭一句模糊的描述我们猜不出来。
 
-本模组最初由 Deadlock989 创作，移植到 0.17 之后由 shanemadden 维护，Deadlock989 亦有贡献。
+本模组最初由 Deadlock989 创作，移植到 0.17 之后由 shanemadden 维护，Deadlock989 亦有贡献。中文分支（Bob's Logistics 支持与简体中文）由 tang-bai 维护。

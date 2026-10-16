@@ -1,36 +1,43 @@
 ![beltbox](https://i.imgur.com/JoFG35F.gif)
 
-# Deadlock's Stacking Beltboxes and Compact Loaders
+# Deadlock 的堆叠机与紧凑装卸机
 
-[Deadlock's Stacking Beltboxes](https://mods.factorio.com/mod/DeadlockStacking) and [Deadlock's Compact Loaders](https://mods.factorio.com/mod/DeadlockLoaders) are now combined into one mod.
+[Deadlock's Stacking Beltboxes](https://mods.factorio.com/mod/DeadlockStacking) 和 [Deadlock's Compact Loaders](https://mods.factorio.com/mod/DeadlockLoaders) 现在已经合并成同一个模组。
 
-For existing saves, the updated versions of the existing Deadlock mod(s) you were using must be loaded to migrate your existing loaders and beltboxes to this new mod - see those mods' pages for more details on how to migrate those saves.
+对于已有存档：你需要先加载原来使用的那些 Deadlock 模组的新版本，才能把存档里的装卸机和堆叠机迁移到本模组——具体迁移方法请参考那些模组的页面。
 
-Bob's Logistics is supported directly by this mod: loaders and beltboxes are created for Bob's belt tiers (the tier-0 basic belt, plus turbo and ultimate when Bob's Logistics is the one providing them) at exactly Bob's belt speeds, and every tier from the basic belt up to the ultimate belt is linked for the upgrade planner. One tier upgrade costs the previous tier's loader plus 2 iron plates and 2 iron gear wheels - see `prototypes/bob_tiers.lua` to change that cost.
+**本模组直接内置了 Bob's Logistics 支持**：会为 Bob 的传送带等级（T0 基础传送带，以及由 Bob 提供的涡轮带和终极带）生成装卸机和堆叠机，速度与 Bob 的传送带完全一致；从基础带一直到终极带的每一档都设置了升级关系，升级规划器可以直接使用。每升一级只需要「上一级装卸机 + 铁板 ×2 + 铁齿轮 ×2」，想调整成本请改 `prototypes/bob_tiers.lua`。
 
-The integration with Factorio Extended (and Extended Plus) and Xander Mod is still in a separate mod - if you're using loaders or beltboxes with their belt tiers, also [get the integrations mod](https://mods.factorio.com/mod/deadlock-integrations).
+与 Factorio Extended（含 Extended Plus）和 Xander Mod 的整合仍然放在另一个模组里——如果你要配合它们的传送带等级使用装卸机/堆叠机，请另外[安装整合模组](https://mods.factorio.com/mod/deadlock-integrations)。
 
-Note that the belt reskin and map recolor options are not yet implemented.
+注意：传送带重新贴图和地图重新配色这两个选项目前还没有实现。
 
-Any issues with the new version? Let us know in the [forum thread.](https://forums.factorio.com/viewtopic.php?f=94&t=57264)
+新版有问题？欢迎到[论坛帖](https://forums.factorio.com/viewtopic.php?f=94&t=57264)反馈。
 
-# Credits
+# 简体中文
 
-* Concept, graphics, and originally authored by [Deadlock989](https://mods.factorio.com/user/deadlock989).
-* Maintained by [shanemadden](https://mods.factorio.com/user/shanemadden).
+本分支自带完整的简体中文（`locale/zh-CN`），装不装汉化包都能正常显示中文；用词沿用社区汉化包 `chinese` 的习惯译法，并补上了汉化包没有的涡轮档、Bob 两档以及两条设置说明。
 
-# Inter-mod support
+# 鸣谢
 
-The modding API available in the new version should be almost completely unchanged from the previous versions. An updated dedicated document is coming soon for the modding API, but here's what you need to know:
+* 概念、美术与最初作者：[Deadlock989](https://mods.factorio.com/user/deadlock989)。
+* 由 [shanemadden](https://mods.factorio.com/user/shanemadden) 维护。
+* 中文分支（Bob's Logistics 支持与简体中文）由 tang-bai 维护。
 
- - The default icon_size has changed to 64x64 for the API calls to add stacked items, since your icons are likely still 32x32 you'll need to pass an icon size. (Vanilla icons are still 32x32, per fff-277 we can expect the new ones sometime during 0.17 experimental)
+# 模组间支持（API）
 
-A call that looked like this:
+新版提供的模组 API 与旧版几乎完全一致。专门文档还在准备中，先说明你需要知道的几点：
+
+ - 用于添加堆叠物品的 API 调用，默认 `icon_size` 已改为 64x64。你的图标如果还是 32x32，就需要显式传入图标尺寸。（原版图标当时仍是 32x32；按 fff-277，预计 0.17 实验版期间会更新）
+
+像这样的调用：
 
     deadlock_stacking.create("raw-wood", icon_path, "deadlock-stacking-1")
 
-with a 32x32 icon will need to be changed to this for 0.17:
+如果图标是 32x32，在 0.17 里要改成：
 
     deadlock_stacking.create("raw-wood", icon_path, "deadlock-stacking-1", 32)
 
- - A new API function is available to create loaders and beltboxes to match any tier of belt. Full documentation coming soon, but intrepid modders will find [parameter details in the comments](https://github.com/shanemadden/factorio-deadlock-beltboxes-loaders/blob/master/prototypes/public.lua#L5) and [examples in the base code](https://github.com/shanemadden/factorio-deadlock-beltboxes-loaders/blob/master/prototypes/vanilla_tiers.lua).
+ - 新提供了一个 API 函数，可以为任意等级的传送带创建装卸机和堆叠机。完整文档稍后补充，心急的模组作者可以先看[参数注释](https://github.com/shanemadden/factorio-deadlock-beltboxes-loaders/blob/master/prototypes/public.lua#L5)和[基础代码里的例子](https://github.com/shanemadden/factorio-deadlock-beltboxes-loaders/blob/master/prototypes/vanilla_tiers.lua)。
+
+更完整的 API 文档见 [README.md](README.md)。

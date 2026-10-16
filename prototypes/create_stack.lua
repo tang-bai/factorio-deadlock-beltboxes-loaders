@@ -59,7 +59,7 @@ function DBL.create_stacked_item(item_name, item_type, graphic_path, icon_size, 
 			return
 		end
 		DBL.log_warning(string.format("creating layered stack icon (%s), this is %dx more rendering effort than a custom icon!", item_name, 1+(#temp_icons*3)))
-		stacked_icons = { { icon = "__deadlock-beltboxes-loaders__/graphics/icons/square/blank.png", scale = 1, icon_size = 32 } }
+		stacked_icons = { { icon = "__deadlock-beltboxes-loaders-CN__/graphics/icons/square/blank.png", scale = 1, icon_size = 32 } }
 		for i = 1, -1, -1 do
 			for _,layer in pairs(temp_icons) do
 				layer.scale = 0.85 * 32/layer.icon_size
@@ -130,7 +130,7 @@ function DBL.create_stacking_recipes(item_name, item_type, stack_size)
 	local stack_icons = table.deepcopy(base_icons)
 	table.insert(stack_icons,
 		{
-			icon = "__deadlock-beltboxes-loaders__/graphics/icons/square/arrow-d-64.png",
+			icon = "__deadlock-beltboxes-loaders-CN__/graphics/icons/square/arrow-d-64.png",
 			scale = 0.25,
 			icon_size = 64,
 		}
@@ -159,7 +159,7 @@ function DBL.create_stacking_recipes(item_name, item_type, stack_size)
 	local unstack_icons = table.deepcopy(base_icons)
 	table.insert(unstack_icons,
 		{
-			icon = "__deadlock-beltboxes-loaders__/graphics/icons/square/arrow-u-64.png",
+			icon = "__deadlock-beltboxes-loaders-CN__/graphics/icons/square/arrow-u-64.png",
 			scale = 0.25,
 			icon_size = 64,
 		}

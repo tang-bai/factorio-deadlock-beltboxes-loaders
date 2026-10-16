@@ -1,8 +1,8 @@
 {
-    "name": "deadlock-beltboxes-loaders",
-    "version": "2.6.2",
-    "title": "Deadlock's Stacking Beltboxes & Compact Loaders",
-    "author": "Deadlock989, Shane Madden, MasterBuilder",
+    "name": "deadlock-beltboxes-loaders-CN",
+    "version": "2.6.3",
+    "title": "Deadlock's Stacking Beltboxes & Compact Loaders (CN)",
+    "author": "Deadlock989, Shane Madden, MasterBuilder, tang-bai",
     "homepage": "https://forums.factorio.com/viewtopic.php?f=94&t=57264",
     "dependencies": [
         "base >= 2.0",
@@ -10,6 +10,6 @@
         "? boblogistics",
         "? space-age"
     ],
-    "description": "Adds minimalist 1x1 loaders and stacking beltboxes for 5x belt compression for ores, plates and some intermediate products",
+    "description": "Adds minimalist 1x1 loaders and stacking beltboxes for 5x belt compression for ores, plates and some intermediate products.\n\nThis is the CN branch of deadlock-beltboxes-loaders, published under its own mod name (deadlock-beltboxes-loaders-CN). It includes built-in support for Bob's Logistics belt tiers (basic, turbo and ultimate) running at that mod's belt speeds, cheap one-tier-upgrade recipes, and a complete Simplified Chinese (zh-CN) translation.",
     "factorio_version": "2.0"
 }
