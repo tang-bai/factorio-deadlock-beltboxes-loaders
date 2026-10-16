@@ -6,7 +6,9 @@
 
 For existing saves, the updated versions of the existing Deadlock mod(s) you were using must be loaded to migrate your existing loaders and beltboxes to this new mod - see those mods' pages for more details on how to migrate those saves.
 
-The integration with Bob's Logistics, Factorio Extended (and Extended Plus), and Xander Mod has been moved to a separate mod - if you're using loaders or beltboxes with their belt tiers, also [get the integrations mod](https://mods.factorio.com/mod/deadlock-integrations).
+Bob's Logistics is supported directly by this mod: loaders and beltboxes are created for Bob's belt tiers (the tier-0 basic belt, plus turbo and ultimate when Bob's Logistics is the one providing them) at exactly Bob's belt speeds, and every tier from the basic belt up to the ultimate belt is linked for the upgrade planner. One tier upgrade costs the previous tier's loader plus 2 iron plates and 2 iron gear wheels - see `prototypes/bob_tiers.lua` to change that cost.
+
+The integration with Factorio Extended (and Extended Plus) and Xander Mod is still in a separate mod - if you're using loaders or beltboxes with their belt tiers, also [get the integrations mod](https://mods.factorio.com/mod/deadlock-integrations).
 
 Note that the belt reskin and map recolor options are not yet implemented.
 

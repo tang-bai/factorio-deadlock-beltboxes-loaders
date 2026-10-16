@@ -1,3 +1,8 @@
+-- Bob's Logistics: loaders and beltboxes for Bob's extra belt tiers
+if mods["boblogistics"] then
+	require("prototypes.bob_tiers")
+end
+
 -- create vanilla stacks
 require("prototypes.vanilla_stacks")
 

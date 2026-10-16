@@ -1,4 +1,16 @@
 ---------------------------------------------------------------------------------------------------
+Version: 2.6.2
+Date: 16. 10. 2026
+  Changes:
+    - Added a complete Simplified Chinese (zh-CN) localisation, following the wording of the community Chinese translation pack, and covering the new Bob's Logistics tiers
+---------------------------------------------------------------------------------------------------
+Version: 2.6.1
+Date: 16. 10. 2026
+  Changes:
+    - Added Bob's Logistics support: loaders and beltboxes matching Bob's belt tiers, running at Bob's belt speeds, including Bob's tier-0 basic belt and the ultimate belt (and the turbo belt when Space Age is not installed)
+    - All tiers are now linked with next_upgrade, so the upgrade planner and fast replace walk through the whole chain from the basic belt up to the ultimate belt
+    - One tier upgrade now costs the previous tier's loader plus 2 iron plates and 2 iron gear wheels (see prototypes/bob_tiers.lua to change the cost)
+---------------------------------------------------------------------------------------------------
 Version: 2.6.0
 Date: 06. 01. 2025
   Changes:
