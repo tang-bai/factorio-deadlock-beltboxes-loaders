@@ -199,6 +199,7 @@ for _, def in ipairs(BOB_TIERS) do
 			loader_item = loader_name,
 			loader_recipe = loader_name,
 			loader_category = "crafting",
+			stack_loader_localised_name = { "entity-name." .. string.format("%s-stack-loader", def.belt) },
 			loader_ingredients = loader_ingredients(def.belt),
 			beltbox = beltbox_name,
 			beltbox_item = beltbox_name,

@@ -5,12 +5,46 @@ Deadlock 的堆叠机与紧凑装卸机（DSB）
 
 如果你是一名模组作者，可以让 DSB 自动为你自己模组里的物品生成堆叠版本。DSB API 的说明见下文。
 
-> 本仓库是 DSB 的中文分支（fork），以独立的模组名 **`deadlock-beltboxes-loaders-CN`** 发布，新增了 **Bob's Logistics 支持**和**简体中文**，改动明细见下面的「本分支的改动」一节。本节以下的内容是上游原有的模组 API 文档，未作改动。
+> 本仓库是 DSB 的中文分支（fork），以独立的模组名 **`deadlock-beltboxes-loaders-CN`** 发布，新增了 **Bob's Logistics 支持**、**堆叠装卸机**（太空时代堆叠机械臂的堆叠能力）和**简体中文**，改动明细见下面的「本分支的改动」一节。本节以下的内容是上游原有的模组 API 文档，未作改动。
 
 本分支的改动
 ==========================
 
 这里只说明本仓库相对上游 [shanemadden/factorio-deadlock-beltboxes-loaders](https://github.com/shanemadden/factorio-deadlock-beltboxes-loaders) 的改动。
+
+版本 2.8.0：堆叠装卸机
+------
+
+* **每一档装卸机都有一个堆叠版本**：黄带、红带、蓝带、涡轮（太空时代）、Bob 的基础带与终极带各生成一台「堆叠装卸机」（原型名 `<传送带名>-stack-loader`）。它的功能与同档装卸机完全一致，另外加上太空时代**堆叠机械臂**的堆叠能力：
+
+  | 引擎字段 | 取值 | 作用 |
+  | --- | --- | --- |
+  | `bulk` | `true` | 允许一次搬运一整堆物品 |
+  | `stack_size_bonus` | 堆叠量（默认 4） | 一次搬运的物品数量 |
+  | `max_belt_stack_size` | 堆叠量（默认 4） | 往传送带上堆放的最大层数 |
+
+  这三个都是 `loader-1x1` 原生支持的属性（[prototypes/create_loader.lua](prototypes/create_loader.lua) 里的 `create_loader_entity`），不需要 `control.lua` 里的运行期脚本，因此没有额外 UPS 开销。
+
+* **解锁与配方**：配方为「同档装卸机 ×1 + 堆叠机械臂 ×1 + 处理单元 ×1」，挂在太空时代自带的**堆叠机械臂科技**（`stack-inserter`）上一起解锁。没装太空时代时整套不生成，装卸机和堆叠机照旧工作。
+
+* **两个新设置项**（[settings.lua](settings.lua)）：
+
+  | 设置项 | 类型 | 默认值 | 说明 |
+  | --- | --- | --- | --- |
+  | 启用堆叠装卸机 | 启动时布尔 | 开 | 关掉后不生成堆叠装卸机 |
+  | 堆叠装卸机堆叠量 | 启动时整数 | 4 | 4/5/6/7/8/10/12/16；默认 4 与堆叠机械臂一致 |
+
+* **图标与说明**：沿用同档装卸机的着色图标，右下角叠加太空时代的堆叠机械臂图标作为徽标；实体说明单独写成「成批搬运整堆物品 + 分层堆放」。
+
+* **传送带上限**：`max_belt_stack_size` 只是这台机器自己的上限，实际能堆几层还受势力当前的「传送带容量」研究（`belt-stack-size-bonus`）限制，和堆叠机械臂完全一致。
+
+* **存档**：只新增了原型，没有改名或改动现有实体，旧存档可以直接继续用；首次加载会提示模组版本变化。
+
+* **升级链**：堆叠装卸机之间按传送带速度串好 `next_upgrade`（Bob 基础 → 黄 → 红 → 蓝 → 涡轮 → Bob 终极），升级规划器与快速替换可以直接用；`fast_replaceable_group` 与同档装卸机相同，所以堆叠版和普通版之间也能互相快速替换。
+
+* **命名**：本模组自建的 6 档在 [locale/zh-CN](locale/zh-CN/deadlock-beltboxes-loaders.cfg) 里有专门译名（堆叠装卸机、快速堆叠装卸机、迅速堆叠装卸机、涡轮堆叠装卸机、基础堆叠装卸机、终极堆叠装卸机）；其它模组调用 `add_tier()` 建的档位回退为「<装卸机名>（堆叠）」，不需要额外翻译。
+
+* **API**：`deadlock.add_tier()` 新增三个可选字段 `stack_loader`、`stack_loader_item`、`stack_loader_localised_name`；另外导出 `deadlock.update_stack_loaders()`，供在 `data-final-fixes` 之后才创建等级（或推迟解锁）的模组补做解锁与升级链。
 
 版本 2.7.0：首个 CN 发行版
 ------
@@ -70,6 +104,8 @@ Bob's Logistics 会重新定义各级传送带的速度，并额外提供「基�
 
 改动都用 Factorio 2.0.77 实际加载 `boblogistics 2.1.1`（外带 `space-age` 与 `chinese` 汉化包）校验过：`--dump-data` 检查每级装卸机速度是否与传送带一致、配方与升级链是否正确；`--dump-prototype-locale` 检查游戏内实际显示的中文文本。
 
+堆叠装卸机（2.8.0）另外单独验证过：`--dump-data` 里 6 档的实体/物品/配方全部生成、`bulk`/`stack_size_bonus`/`max_belt_stack_size` 与对应传送带速度一致、6 个配方都挂在 `stack-inserter` 科技的 `unlock-recipe` 列表里；把 `space-age` 显式禁用后重新导出，确认一台堆叠装卸机都不会生成，且原有装卸机/堆叠机完好。打包成 zip 后再加载一次，同样 6 档齐全。
+
 自行打包 / 重新打包
 ------
 
@@ -84,6 +120,7 @@ New-Item -ItemType Directory -Path $stage | Out-Null
 Get-ChildItem -Force . | Where-Object { $_.Name -notin @('.git','.github') } |
   ForEach-Object { Copy-Item $_.FullName $stage -Recurse -Force }
 
+Add-Type -AssemblyName System.IO.Compression        # ZipArchiveMode 在这个程序集里
 Add-Type -AssemblyName System.IO.Compression.FileSystem
 $zip = "$env:APPDATA\Factorio\mods\$base.zip"
 if (Test-Path $zip) { Remove-Item -Force $zip }

@@ -20,6 +20,20 @@ end
 DBL.STACK_SIZE = settings.startup["deadlock-stack-size"].value
 DBL.CRAFT_TIME = DBL.STACK_SIZE / 15
 
+-- stacking loaders: the normal loader of a tier, plus Space Age's stacking properties
+-- (bulk / stack_size_bonus / max_belt_stack_size), so it moves whole stacks of items and
+-- layers them onto belts. Creation lives in prototypes/create_loader.lua.
+DBL.STACK_LOADER_ENABLED             = settings.startup["deadlock-enable-stack-loaders"].value
+DBL.STACK_LOADER_STACK_SIZE          = settings.startup["deadlock-stack-loader-stack-size"].value
+DBL.STACK_LOADER_INGREDIENT          = "stack-inserter" -- item the recipe is built from
+DBL.STACK_LOADER_TECH                = "stack-inserter" -- technology that unlocks the recipes
+DBL.STACK_LOADER_WAIT_FOR_FULL_STACK = false            -- true: only move when a full stack is available
+DBL.created_stack_loaders            = {}               -- names already created
+DBL.stack_loader_tiers               = {}               -- {name, speed} for the next_upgrade chain
+DBL.stack_loader_recipes             = {}               -- recipes still to unlock
+DBL.stack_loader_unlocked            = {}               -- recipes already added to the technology
+DBL.pending_stack_loader_tiers       = {}               -- tiers waiting for Space Age data
+
 DBL.VANILLA_ITEMS = {
 	[1] = { "wood", "iron-ore", "copper-ore", "stone", "coal", "iron-plate", "copper-plate", "steel-plate", "stone-brick", "tungsten-ore" },
 	[2] = { "copper-cable", "iron-gear-wheel", "iron-stick", "sulfur", "plastic-bar", "solid-fuel", "electronic-circuit", "advanced-circuit" },

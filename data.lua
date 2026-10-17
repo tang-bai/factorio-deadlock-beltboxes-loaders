@@ -6,3 +6,6 @@ require("prototypes.create_stack")
 require("prototypes.public")
 -- vanilla tiers
 require("prototypes.vanilla_tiers")
+
+-- stacking loaders: unlock the recipes and link the tiers created above
+deadlock.update_stack_loaders()

@@ -1,3 +1,6 @@
+-- stacking loaders for tiers other mods created before us in their own data-final-fixes.lua
+deadlock.update_stack_loaders()
+
 -- run late stack updates for changes to stack sizes, fuel values, etc
 deadlock.deferred_stacked_item_updates()
 

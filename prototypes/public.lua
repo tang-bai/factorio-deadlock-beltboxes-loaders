@@ -22,6 +22,8 @@ function deadlock.add_tier(tier_table)
 	--  loader_recipe       = string, -- optional, only if you need to override the recipe name (for legacy compatibility)
 	--  loader_item         = string, -- optional, only if you need to override the item name (for legacy compatibility)
 	--  loader_category     = string, -- optional, default to "crafting" but use "crafting-with-fluid" if there's fluid in the recipe
+	--  stack_loader        = string, -- optional, prototype string for the stacking loader that'll be created, defaults to transport_belt.."-stack-loader"
+	--  stack_loader_item   = string, -- optional, only if you need to override the item/recipe name of the stacking loader
 	--  beltbox             = string, -- optional, prototype string for the beltbox that'll be created, defaults to transport_belt.."-beltbox"
 	--  beltbox_ingredients = table,  -- mandatory unless underground_belt specified, used for loader recipe cost
 	--  beltbox_technology  = string, -- optional, defaults to beltbox_name but can be overridden (vanilla use "deadlock-stacking-[1-3]" for legacy compatibility, since other mods' create() functions for stackable items likely point at these)
@@ -98,6 +100,15 @@ function deadlock.add_tier(tier_table)
 		tier_table.loader = string.format("%s-loader", tier_table.transport_belt)
 	end
 
+	-- stacking variant of the same tier: the loader plus Space Age's stacking properties.
+	-- It is only created when Space Age is installed and "Enable stack loaders" is on.
+	if not tier_table.stack_loader then
+		tier_table.stack_loader = string.format("%s-stack-loader", tier_table.transport_belt)
+	end
+	if not tier_table.stack_loader_item then
+		tier_table.stack_loader_item = tier_table.stack_loader
+	end
+
 	if not tier_table.beltbox_ingredients then
 		tier_table.beltbox_ingredients = data.raw.recipe[tier_table.underground_belt].ingredients
 	end
@@ -126,6 +137,17 @@ function deadlock.add_tier(tier_table)
 	if settings.startup["deadlock-enable-beltboxes"].value then
 		DBL.create_beltbox(tier_table)
 	end
+end
+
+------------------------------------------------------------------------------------------------------------------------------------------------------
+
+-- deadlock.update_stack_loaders()
+-- Unlocks any stacking loader recipes whose technology didn't exist yet, and links the tiers
+-- together for fast replace / the upgrade planner. Called by the mod from data.lua,
+-- data-updates.lua and data-final-fixes.lua; only needed by other mods that create tiers after
+-- all of those have already run.
+function deadlock.update_stack_loaders()
+	DBL.update_stack_loaders()
 end
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------

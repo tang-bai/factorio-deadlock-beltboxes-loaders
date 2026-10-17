@@ -6,6 +6,7 @@ deadlock.add_tier({
 	splitter            = "splitter",
 	technology          = "logistics",
 	order               = "a",
+	stack_loader_localised_name = {"entity-name.transport-belt-stack-loader"},
 	loader_ingredients  = {
 		{name = "transport-belt", type = "item", amount = 1},
 		{name = "iron-plate", type = "item", amount = 5},
@@ -33,6 +34,7 @@ deadlock.add_tier({
 	splitter            = "fast-splitter",
 	technology          = "logistics-2",
 	order               = "b",
+	stack_loader_localised_name = {"entity-name.fast-transport-belt-stack-loader"},
 	loader_ingredients  = {
 		{name = "transport-belt-loader", type = "item", amount = 1},
 		{name = "iron-gear-wheel", type = "item", amount = 20},
@@ -71,6 +73,7 @@ deadlock.add_tier({
 	splitter            = "express-splitter",
 	technology          = "logistics-3",
 	order               = "c",
+	stack_loader_localised_name = {"entity-name.express-transport-belt-stack-loader"},
 	loader_ingredients  = {
 		{name = "fast-transport-belt-loader", type = "item", amount = 1},
 		{name = "iron-gear-wheel", type = "item", amount = 40},
@@ -107,6 +110,7 @@ if mods["space-age"] then
 		splitter            = "turbo-splitter",
 		technology          = "turbo-transport-belt",
 		order               = "d",
+		stack_loader_localised_name = {"entity-name.turbo-transport-belt-stack-loader"},
 		loader_ingredients  = {
 			{name = "express-transport-belt-loader", type = "item", amount = 1},
 			{name = "tungsten-plate", type = "item", amount = 20},
