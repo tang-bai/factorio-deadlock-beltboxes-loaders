@@ -172,14 +172,19 @@ local function create_beltbox_recipe(tier_table)
 	return recipe
 end
 
-local function create_beltbox_technology(tier_table)
+-- with_recipe = false builds the technology without the beltbox recipe unlock, which is what we
+-- need when the beltbox machines are switched off but the stacked items are still generated
+local function create_beltbox_technology(tier_table, with_recipe)
 	local tech = table.deepcopy(data.raw.technology[tier_table.technology])
-	tech.effects = {
-		{
-			type = "unlock-recipe",
-			recipe = tier_table.beltbox_recipe or tier_table.beltbox,
+	tech.effects = {}
+	if with_recipe then
+		tech.effects = {
+			{
+				type = "unlock-recipe",
+				recipe = tier_table.beltbox_recipe or tier_table.beltbox,
+			}
 		}
-	}
+	end
 	tech.icons = {
 		{ icon = "__deadlock-beltboxes-loaders-CN__/graphics/icons/square/beltbox-icon-base-128.png", icon_size = 128 },  -- 1.1 appears to be defaulting to 256
 		{ icon = "__deadlock-beltboxes-loaders-CN__/graphics/icons/square/beltbox-icon-mask-128.png", icon_size = 128, tint = tier_table.colour },  -- 1.1 appears to be defaulting to 256
@@ -189,6 +194,37 @@ local function create_beltbox_technology(tier_table)
 	tech.prerequisites = {tier_table.technology}
 	tech.upgrade = false
 	return tech
+end
+
+-- create this tier's stacking technology without any beltbox machines, so that the stacked
+-- items created by add_stack() still have somewhere to unlock their recipes
+function DBL.ensure_stack_technology(tier_table)
+	if not (tier_table.technology and tier_table.beltbox_technology) then
+		return
+	end
+	if data.raw.technology[tier_table.beltbox_technology] then
+		return
+	end
+	if not data.raw.technology[tier_table.technology] then
+		DBL.log_warning(string.format("Can't create stacking technology %s: %s is missing", tier_table.beltbox_technology, tier_table.technology))
+		return
+	end
+	DBL.debug(string.format("Creating stacking-only tech %s", tier_table.beltbox_technology))
+	local tech = create_beltbox_technology(tier_table, false)
+	-- normally vanilla_tiers.lua chains the stacking technologies together; when they're created
+	-- on demand there's no machine tier to do it, so keep them in order here
+	local tier_index = tonumber(string.match(tier_table.beltbox_technology or "", "^deadlock%-stacking%-(%d+)$"))
+	if tier_index and tier_index > 1 then
+		local previous = string.format("deadlock-stacking-%d", tier_index - 1)
+		if data.raw.technology[previous] then
+			tech.prerequisites = tech.prerequisites or {}
+			table.insert(tech.prerequisites, previous)
+		end
+	end
+	data:extend({
+		tech
+	})
+	DBL.BELTBOX_TECHS[tier_table.beltbox_technology] = data.raw.technology[tier_table.beltbox_technology]
 end
 
 function DBL.create_beltbox(tier_table)
@@ -207,7 +243,7 @@ function DBL.create_beltbox(tier_table)
 			})
 		else
 			data:extend({
-				create_beltbox_technology(tier_table)
+				create_beltbox_technology(tier_table, true)
 			})
 			DBL.BELTBOX_TECHS[tier_table.beltbox_technology] = data.raw.technology[tier_table.beltbox_technology]
 		end

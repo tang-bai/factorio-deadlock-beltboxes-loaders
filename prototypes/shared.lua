@@ -20,6 +20,14 @@ end
 DBL.STACK_SIZE = settings.startup["deadlock-stack-size"].value
 DBL.CRAFT_TIME = DBL.STACK_SIZE / 15
 
+-- two independent switches: the beltbox machines themselves, and the stacked items/recipes they
+-- run. Beltboxes off + stacks on keeps the 5x compression items without generating the machines.
+DBL.BELTBOXES_ENABLED = settings.startup["deadlock-enable-beltboxes"].value
+DBL.STACKS_ENABLED    = settings.startup["deadlock-enable-stacks"].value
+-- tiers whose beltbox machines are switched off: their stacking technology is created on demand,
+-- the first time something is actually stacked into it (see DBL.add_stacks_to_tech)
+DBL.pending_stack_techs = {}
+
 -- stacking loaders: the normal loader of a tier, plus Space Age's stacking properties
 -- (bulk / stack_size_bonus / max_belt_stack_size), so it moves whole stacks of items and
 -- layers them onto belts. Creation lives in prototypes/create_loader.lua.

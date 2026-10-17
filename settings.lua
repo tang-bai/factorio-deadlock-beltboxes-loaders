@@ -9,6 +9,13 @@ data:extend({
 	},
 	{
 		type = "bool-setting",
+		name = "deadlock-enable-stacks",
+		order = "a1",
+		setting_type = "startup",
+		default_value = true,
+	},
+	{
+		type = "bool-setting",
 		name = "deadlock-enable-loaders",
 		order = "b",
 		setting_type = "startup",

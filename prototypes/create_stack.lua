@@ -189,6 +189,15 @@ end
 
 -- make the stacking recipes depend on a technology
 function DBL.add_stacks_to_tech(item_name, target_technology)
+	-- with the beltbox machines switched off, the stacking technologies are created on demand, the
+	-- first time a recipe is actually added to them
+	if not data.raw.technology[target_technology] and DBL.pending_stack_techs[target_technology] then
+		DBL.ensure_stack_technology(DBL.pending_stack_techs[target_technology])
+	end
+	if not data.raw.technology[target_technology] then
+		DBL.log_error(string.format("Can't add stacking for %s: technology %s doesn't exist", item_name, target_technology))
+		return
+	end
 	-- gather what recipes this tech currently unlocks to avoid adding duplicates
 	local recipes = {}
 	for _, effect in pairs(data.raw.technology[target_technology].effects) do

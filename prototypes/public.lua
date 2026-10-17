@@ -136,6 +136,12 @@ function deadlock.add_tier(tier_table)
 	end
 	if settings.startup["deadlock-enable-beltboxes"].value then
 		DBL.create_beltbox(tier_table)
+	elseif settings.startup["deadlock-enable-stacks"].value then
+		-- no beltbox machines for this tier: remember it, so that its stacking technology can be
+		-- created on demand if something is actually stacked into it later on
+		if tier_table.beltbox_technology and tier_table.technology then
+			DBL.pending_stack_techs[tier_table.beltbox_technology] = tier_table
+		end
 	end
 end
 
@@ -211,7 +217,7 @@ function deadlock.add_stack(item_name, graphic_path, target_tech, icon_size, ite
 		icon_size = 64
 	end
 	DBL.debug(string.format("Data validation completed for stacked item %s", item_name))
-	if settings.startup["deadlock-enable-beltboxes"].value then
+	if settings.startup["deadlock-enable-stacks"].value then
 		local stack_size = deadlock.get_item_stack_density(item_name, item_type)
 		DBL.create_stacked_item(item_name, item_type, graphic_path, icon_size, stack_size, mipmap_levels)
 		DBL.create_stacking_recipes(item_name, item_type, stack_size)
