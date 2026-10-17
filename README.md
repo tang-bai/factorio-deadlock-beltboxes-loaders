@@ -77,13 +77,13 @@ DSB 给这些物品各加一个压缩版本：
 
 ## 2. 新增物品一览
 
-所有内容按传送带**档位**组织。默认 3 档（黄、红、蓝）；装了太空时代会多出涡轮档；Bob's Logistics 再补 T0 基础、T5 终极（以及没装太空时代时的涡轮档）。表里的「原型名」就是 `data.raw` 里的名字，可在控制台、模组代码或蓝图里直接引用。
+所有内容按传送带**档位**组织。默认 3 档（黄、红、蓝）；装了太空时代会多出 Turbo 档；Bob's Logistics 再补 T0 基础、T5 终极（以及没装太空时代时的 Turbo 档）。表里的「原型名」就是 `data.raw` 里的名字，可在控制台、模组代码或蓝图里直接引用。
 
 > 表中的 15/30/45/60 是原版默认运力。Bob's Logistics 的传送带速度设置会改掉这些数字；装卸机与堆叠机在数据阶段读取实际速度，会自动跟随。
 
 | 新增物品 | 数量 | 说明 |
 | --- | --- | --- |
-| 装卸机 | 最多 6 档 | 黄、红、蓝，以及涡轮（太空时代）、基础与终极（Bob's Logistics） |
+| 装卸机 | 最多 6 档 | 黄、红、蓝，以及 Turbo（太空时代）、基础与终极（Bob's Logistics） |
 | 堆叠机 | 最多 6 档 | 与装卸机同档，负责压缩与平分解压 |
 | 堆叠装卸机 | 最多 6 档 | 需要太空时代，是每档装卸机的堆叠版本 |
 | 堆叠物品 | 原版 23 种 | `deadlock-stack-*`，按科技分三批解锁；其它物品可通过 API 添加 |
@@ -100,30 +100,30 @@ DSB 给这些物品各加一个压缩版本：
 
 | 档位 | 物品（中文 / 英文） | 原型名 | 速度 | 解锁科技 |
 | --- | --- | --- | --- | --- |
-| T0 基础 <sup>Bob</sup> | 基础简洁装卸机 / Basic compact loader | `bob-basic-transport-belt-loader` | 同 Bob 基础带 | `logistics-0`（Bob 的基础物流科技） |
-| T1 黄 | 简洁装卸机 / Compact loader | `transport-belt-loader` | 15 个/秒 | `logistics`（物流学） |
-| T2 红 | 快速简洁装卸机 / Fast compact loader | `fast-transport-belt-loader` | 30 个/秒 | `logistics-2`（物流学 2） |
-| T3 蓝 | 迅速简洁装卸机 / Express compact loader | `express-transport-belt-loader` | 45 个/秒 | `logistics-3`（物流学 3） |
-| T4 涡轮 | 涡轮简洁装卸机 / Turbo compact loader | `turbo-transport-belt-loader` | 60 个/秒 <sup>SA</sup> | `turbo-transport-belt`（涡轮传送带）<sup>SA</sup> / `logistics-4` <sup>Bob</sup> |
-| T5 终极 <sup>Bob</sup> | 终极简洁装卸机 / Ultimate compact loader | `bob-ultimate-transport-belt-loader` | 同 Bob 终极带 | `logistics-5`（Bob 的最高级物流科技） |
+| T0 基础 <sup>Bob</sup> | 基础装卸机 / Basic compact loader | `bob-basic-transport-belt-loader` | 同 Bob 基础带 | `logistics-0`（Bob 的基础物流科技） |
+| T1 黄 | 装卸机 / Compact loader | `transport-belt-loader` | 15 个/秒 | `logistics`（物流学） |
+| T2 红 | 快速装卸机 / Fast compact loader | `fast-transport-belt-loader` | 30 个/秒 | `logistics-2`（物流学 2） |
+| T3 蓝 | 迅速装卸机 / Express compact loader | `express-transport-belt-loader` | 45 个/秒 | `logistics-3`（物流学 3） |
+| T4 Turbo | Turbo 装卸机 / Turbo compact loader | `turbo-transport-belt-loader` | 60 个/秒 <sup>SA</sup> | `turbo-transport-belt`（Turbo 传送带）<sup>SA</sup> / `logistics-4` <sup>Bob</sup> |
+| T5 终极 <sup>Bob</sup> | 终极装卸机 / Ultimate compact loader | `bob-ultimate-transport-belt-loader` | 同 Bob 终极带 | `logistics-5`（Bob 的最高级物流科技） |
 
 <sup>Bob</sup>：只有安装 Bob's Logistics 才会生成；T0 还要求 Bob 的「基础传送带」存在（传送带重置设置）。<br>
-<sup>SA</sup>：只有安装太空时代才会生成；如果涡轮带由 Bob's Logistics 提供（没装太空时代），同一台装卸机改由 `logistics-4` 解锁。
+<sup>SA</sup>：只有安装太空时代才会生成；如果 Turbo 传送带由 Bob's Logistics 提供（没装太空时代），同一台装卸机改由 `logistics-4` 解锁。
 
 **默认配方（未安装 Bob's Logistics）**
 
 | 档位 | 配方 | 制造分类 |
 | --- | --- | --- |
 | T1 | 传送带 ×1 + 铁板 ×5 | 手工 |
-| T2 | 简洁装卸机 ×1 + 铁齿轮 ×20 | 手工 |
-| T3 | 快速简洁装卸机 ×1 + 铁齿轮 ×40 + 润滑液 ×20 | 带流体；装了太空时代时也可在铸造厂制造 |
-| T4 | 迅速简洁装卸机 ×1 + 钨板 ×20 + 润滑液 ×20 | 带流体或冶金（铸造厂） |
+| T2 | 装卸机 ×1 + 铁齿轮 ×20 | 手工 |
+| T3 | 快速装卸机 ×1 + 铁齿轮 ×40 + 润滑液 ×20 | 带流体；装了太空时代时也可在铸造厂制造 |
+| T4 | 迅速装卸机 ×1 + 钨板 ×20 + 润滑液 ×20 | 带流体或冶金（铸造厂） |
 
 **安装 Bob's Logistics 后**，整条 T0→T5 链（包括原版各档）会统一成同一种升级配方：
 
 > 上一级装卸机 ×1 + 铁板 ×2 + 铁齿轮 ×2
 
-T0 没有上一级，用「Bob 基础传送带 ×1」起步。所有档位的分类都改成「手工」，蓝带和涡轮档不再依赖铸造厂。想调成本，改 [prototypes/bob_tiers.lua](prototypes/bob_tiers.lua) 顶部的 `CONFIG`（`upgrade_iron_plate`、`upgrade_iron_gear`、`upgrade_from_previous`、`reprice_existing_tiers`）。
+T0 没有上一级，用「Bob 基础传送带 ×1」起步。所有档位的分类都改成「手工」，蓝带和 Turbo 档不再依赖铸造厂。想调成本，改 [prototypes/bob_tiers.lua](prototypes/bob_tiers.lua) 顶部的 `CONFIG`（`upgrade_iron_plate`、`upgrade_iron_gear`、`upgrade_from_previous`、`reprice_existing_tiers`）。
 
 ### 2.2 堆叠机
 
@@ -142,7 +142,7 @@ T0 没有上一级，用「Bob 基础传送带 ×1」起步。所有档位的分
 | T1 黄 | 堆叠机 / Stacking beltbox | `transport-belt-beltbox` | 15 个/秒 | 3 个堆叠物品/秒 | 堆叠科技 1（`deadlock-stacking-1`） |
 | T2 红 | 快速堆叠机 / Fast stacking beltbox | `fast-transport-belt-beltbox` | 30 个/秒 | 6 个/秒 | 堆叠科技 2（`deadlock-stacking-2`） |
 | T3 蓝 | 迅速堆叠机 / Express stacking beltbox | `express-transport-belt-beltbox` | 45 个/秒 | 9 个/秒 | 堆叠科技 3（`deadlock-stacking-3`） |
-| T4 涡轮 | 涡轮堆叠机 / Turbo stacking beltbox | `turbo-transport-belt-beltbox` | 60 个/秒 <sup>SA</sup> | 12 个/秒 | 堆叠科技 4（`deadlock-stacking-4`） |
+| T4 Turbo | Turbo 堆叠机 / Turbo stacking beltbox | `turbo-transport-belt-beltbox` | 60 个/秒 <sup>SA</sup> | 12 个/秒 | 堆叠科技 4（`deadlock-stacking-4`） |
 | T5 终极 <sup>Bob</sup> | 终极堆叠机 / Ultimate stacking beltbox | `bob-ultimate-transport-belt-beltbox` | 同 Bob 终极带 | 带速 ÷ 5 | 堆叠科技 5（`deadlock-stacking-5`） |
 
 **默认配方（未安装 Bob's Logistics）**
@@ -159,9 +159,9 @@ T0 没有上一级，用「Bob 基础传送带 ×1」起步。所有档位的分
 | 档位 | 配方 | 制造分类 |
 | --- | --- | --- |
 | T0 基础 | 基础传送带 ×4 + 铁板 ×5 + 铁齿轮 ×5 | 手工 |
-| T5 终极 | 涡轮堆叠机 ×1 + 铁板 ×40 + 铁齿轮 ×40 + 处理器 ×10 | 手工 |
+| T5 终极 | Turbo 堆叠机 ×1 + 铁板 ×40 + 铁齿轮 ×40 + 处理器 ×10 | 手工 |
 
-如果涡轮带由 Bob 提供（没装太空时代），T4 的堆叠机配方是「迅速堆叠机 ×1 + 铁板 ×30 + 铁齿轮 ×30 + 处理器 ×5」，并且可以直接手搓。Bob 的廉价升级规则默认只改装卸机，不改堆叠机；想连堆叠机一起改，把 [prototypes/bob_tiers.lua](prototypes/bob_tiers.lua) 里的 `CONFIG.beltbox_recipes` 设为 `"upgrade"`。
+如果 Turbo 传送带由 Bob 提供（没装太空时代），T4 的堆叠机配方是「迅速堆叠机 ×1 + 铁板 ×30 + 铁齿轮 ×30 + 处理器 ×5」，并且可以直接手搓。Bob 的廉价升级规则默认只改装卸机，不改堆叠机；想连堆叠机一起改，把 [prototypes/bob_tiers.lua](prototypes/bob_tiers.lua) 里的 `CONFIG.beltbox_recipes` 设为 `"upgrade"`。
 
 **堆叠科技**：
 
@@ -193,7 +193,7 @@ T0 没有上一级，用「Bob 基础传送带 ×1」起步。所有档位的分
 | T1 黄 | 堆叠装卸机 / Stack loader | `transport-belt-stack-loader` |
 | T2 红 | 快速堆叠装卸机 / Fast stack loader | `fast-transport-belt-stack-loader` |
 | T3 蓝 | 迅速堆叠装卸机 / Express stack loader | `express-transport-belt-stack-loader` |
-| T4 涡轮 | 涡轮堆叠装卸机 / Turbo stack loader | `turbo-transport-belt-stack-loader` |
+| T4 Turbo | Turbo 堆叠装卸机 / Turbo stack loader | `turbo-transport-belt-stack-loader` |
 | T5 终极 <sup>Bob</sup> | 终极堆叠装卸机 / Ultimate stack loader | `bob-ultimate-transport-belt-stack-loader` |
 
 其他模组通过 [API](API.md) 创建的等级，其堆叠装卸机默认显示为「装卸机名（堆叠）」。
@@ -276,7 +276,7 @@ T0 没有上一级，用「Bob 基础传送带 ×1」起步。所有档位的分
 | 黄 | 15 个/秒 | 15 个基础物品/秒 | 3 个堆叠物品/秒 |
 | 红 | 30 个/秒 | 30 个基础物品/秒 | 6 个/秒 |
 | 蓝 | 45 个/秒 | 45 个基础物品/秒 | 9 个/秒 |
-| 涡轮 | 60 个/秒 | 60 个基础物品/秒 | 12 个/秒 |
+| Turbo | 60 个/秒 | 60 个基础物品/秒 | 12 个/秒 |
 
 Bob's Logistics 各档按 Bob 的实际带速等比变化；修改「堆叠比例」只改变最后一列，基础物品吞吐仍与带子对齐。
 
@@ -326,8 +326,8 @@ Bob's Logistics 各档按 Bob 的实际带速等比变化；修改「堆叠比�
 | 依赖 | 关系 | 说明 |
 | --- | --- | --- |
 | base ≥ 2.0 | 必需 | 仅支持 Factorio 2.0。 |
-| Space Age | 可选 | 提供涡轮档、堆叠装卸机与传送带分层堆放；没有它时这些内容不会生成。 |
-| Bob's Logistics | 可选 | 增加 T0 基础、T5 终极（以及没装太空时代时的涡轮档），并启用廉价升级配方；速度自动同步 Bob 的设置。 |
+| Space Age | 可选 | 提供 Turbo 档、堆叠装卸机与传送带分层堆放；没有它时这些内容不会生成。 |
+| Bob's Logistics | 可选 | 增加 T0 基础、T5 终极（以及没装太空时代时的 Turbo 档），并启用廉价升级配方；速度自动同步 Bob 的设置。 |
 | ReStack | 可选 | 沿用上游的加载顺序安排；本分支没有针对它的特殊代码。 |
 | [deadlock-integrations](https://mods.factorio.com/mod/deadlock-integrations) | 另装 | 为 Factorio Extended（含 Plus）与 Xander Mod 的传送带等级提供整合。 |
 
@@ -403,7 +403,7 @@ Bob's Logistics 各档按 Bob 的实际带速等比变化；修改「堆叠比�
 **为什么压缩之后，箱子/车厢的容量没变？**<br>
 堆叠物品的堆叠数按比例缩小了，一格仍然装同样多的基础物品。它优化的是传送带占用，不是库存容量。
 
-**为什么没有涡轮档 / 堆叠装卸机？**<br>
+**为什么没有 Turbo 档 / 堆叠装卸机？**<br>
 它们需要太空时代。堆叠装卸机还需要先研究太空时代的「堆叠机械臂」科技。
 
 **为什么没有基础档 / 终极档？**<br>

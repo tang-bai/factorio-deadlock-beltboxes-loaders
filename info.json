@@ -10,6 +10,6 @@
         "? boblogistics",
         "? space-age"
     ],
-    "description": "添加1x1装卸机和堆叠机，使一些资源和产品，以实现5倍压缩率，便于传送带上运输。本模组是 deadlock-beltboxes-loaders 的中文分支（内部名称 deadlock-beltboxes-loaders-CN）：内置 Bob's Logistics 的传送带等级支持（基础/涡轮/终极，与该模组的传送带同速），每一级升级只需「上一级装卸机 + 铁板 ×2 + 铁齿轮 ×2」，每一档装卸机都有太空时代的堆叠版本（成批搬运整堆物品，并能把物品分层堆放到传送带上），并自带完整简体中文。",
+    "description": "添加1x1装卸机和堆叠机，使一些资源和产品，以实现5倍压缩率，便于传送带上运输。本模组是 deadlock-beltboxes-loaders 的中文分支（内部名称 deadlock-beltboxes-loaders-CN）：内置 Bob's Logistics 的传送带等级支持（基础/Turbo/终极，与该模组的传送带同速），每一级升级只需「上一级装卸机 + 铁板 ×2 + 铁齿轮 ×2」，每一档装卸机都有太空时代的堆叠版本（成批搬运整堆物品，并能把物品分层堆放到传送带上），并自带完整简体中文。",
     "factorio_version": "2.0"
 }
