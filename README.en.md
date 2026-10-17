@@ -1,4 +1,4 @@
-> **Note:** this is the original English text of the upstream mod, kept for reference. This repository is the CN branch, published under the mod name `deadlock-beltboxes-loaders-CN` — see [README.md](README.md).
+> **Note:** this is the original English text of the upstream mod, kept for reference. This repository is the CN branch, published under the mod name `deadlock-beltboxes-loaders-CN` — see [README.md](README.md) for the current (Chinese) mod documentation, and [API.md](API.md) for the modding API.
 
 Deadlock’s Stacking Beltboxes & Compact Loaders
 ==========================

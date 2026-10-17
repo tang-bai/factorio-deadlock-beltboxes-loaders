@@ -8,7 +8,7 @@
 
 **本模组直接内置了 Bob's Logistics 支持**：会为 Bob 的传送带等级（T0 基础传送带，以及由 Bob 提供的涡轮带和终极带）生成装卸机和堆叠机，速度与 Bob 的传送带完全一致；从基础带一直到终极带的每一档都设置了升级关系，升级规划器可以直接使用。每升一级只需要「上一级装卸机 + 铁板 ×2 + 铁齿轮 ×2」，想调整成本请改 `prototypes/bob_tiers.lua`。
 
-**堆叠装卸机（需要太空时代）**：每一档装卸机都有一个堆叠版本，保留原有的装卸功能，并具备太空时代堆叠机械臂的堆叠能力——一次搬运整堆物品，并能把整堆物品分层放到传送带上。配方为「同档装卸机 + 堆叠机械臂 + 处理单元」，由太空时代的「堆叠机械臂」科技解锁；堆叠量可以在设置里调整（默认 4，与堆叠机械臂一致）。没装太空时代时不会生成。
+**堆叠装卸机（需要太空时代）**：每一档装卸机都有一个堆叠版本，保留原有的装卸功能，并具备太空时代堆叠机械臂的堆叠能力——一次搬运整堆物品，并能把整堆物品分层放到传送带上。配方为「同档装卸机 + 堆叠机械臂 + 处理器」，由太空时代的「堆叠机械臂」科技解锁；堆叠量可以在设置里调整（默认 4，与堆叠机械臂一致）。没装太空时代时不会生成。
 
 与 Factorio Extended（含 Extended Plus）和 Xander Mod 的整合仍然放在另一个模组里——如果你要配合它们的传送带等级使用装卸机/堆叠机，请另外[安装整合模组](https://mods.factorio.com/mod/deadlock-integrations)。
 
@@ -28,7 +28,7 @@
 
 # 模组间支持（API）
 
-新版提供的模组 API 与旧版几乎完全一致。专门文档还在准备中，先说明你需要知道的几点：
+新版提供的模组 API 与旧版几乎完全一致。完整文档见 [API.md](https://github.com/tang-bai/factorio-deadlock-beltboxes-loaders/blob/master/API.md)，先说明你需要知道的几点：
 
  - 用于添加堆叠物品的 API 调用，默认 `icon_size` 已改为 64x64。你的图标如果还是 32x32，就需要显式传入图标尺寸。（原版图标当时仍是 32x32；按 fff-277，预计 0.17 实验版期间会更新）
 
@@ -40,6 +40,6 @@
 
     deadlock_stacking.create("raw-wood", icon_path, "deadlock-stacking-1", 32)
 
- - 新提供了一个 API 函数，可以为任意等级的传送带创建装卸机和堆叠机。完整文档稍后补充，心急的模组作者可以先看[参数注释](https://github.com/shanemadden/factorio-deadlock-beltboxes-loaders/blob/master/prototypes/public.lua#L5)和[基础代码里的例子](https://github.com/shanemadden/factorio-deadlock-beltboxes-loaders/blob/master/prototypes/vanilla_tiers.lua)。
+ - 新提供了一个 API 函数，可以为任意等级的传送带创建装卸机和堆叠机。完整说明见 [API.md](https://github.com/tang-bai/factorio-deadlock-beltboxes-loaders/blob/master/API.md)，心急的模组作者也可以先看[参数注释](https://github.com/shanemadden/factorio-deadlock-beltboxes-loaders/blob/master/prototypes/public.lua#L5)和[基础代码里的例子](https://github.com/shanemadden/factorio-deadlock-beltboxes-loaders/blob/master/prototypes/vanilla_tiers.lua)。
 
-更完整的 API 文档见 [README.md](README.md)。
+更完整的 API 文档见 [API.md](https://github.com/tang-bai/factorio-deadlock-beltboxes-loaders/blob/master/API.md)，模组内容与新增物品见 [README.md](https://github.com/tang-bai/factorio-deadlock-beltboxes-loaders/blob/master/README.md)。

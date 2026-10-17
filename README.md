@@ -1,304 +1,433 @@
-Deadlock 的堆叠机与紧凑装卸机（DSB）
-==========================
+# Deadlock 的堆叠机与紧凑装卸机（DSB · CN 分支）
 
-**DSB** 是一个异星工厂（Factorio）模组，添加 1x1 的小型装卸机（loader）和堆叠机（beltbox）。它们可以在传送带上就地堆叠物品，大幅提高传送带吞吐量。
+<img src="thumbnail.png" width="144" align="right" alt="DSB 模组图标">
 
-如果你是一名模组作者，可以让 DSB 自动为你自己模组里的物品生成堆叠版本。DSB API 的说明见下文。
+**DSB**（Deadlock's Stacking Beltboxes & Compact Loaders）是一个 Factorio 2.0 模组，把 Deadlock989 的「堆叠机」与「紧凑装卸机」合并在一起。它添加几类 1x1 机器和一套压缩物品：**堆叠机**把若干同类物品压成一个堆叠物品（默认 5:1），让一条传送带能运更多东西；**装卸机**让箱子、机器和传送带直接对接，吞吐量等于整条传送带。默认堆叠比例为 5，因此通常说它提供 **5 倍传送带压缩**。
 
-> 本仓库是 DSB 的中文分支（fork），以独立的模组名 **`deadlock-beltboxes-loaders-CN`** 发布，新增了 **Bob's Logistics 支持**、**堆叠装卸机**（太空时代堆叠机械臂的堆叠能力）和**简体中文**，改动明细见下面的「本分支的改动」一节。本节以下的内容是上游原有的模组 API 文档，未作改动。
+本仓库是上游 [shanemadden/factorio-deadlock-beltboxes-loaders](https://github.com/shanemadden/factorio-deadlock-beltboxes-loaders) 的**中文分支**，以独立模组名 `deadlock-beltboxes-loaders-CN` 发布，相对上游新增：
 
-本分支的改动
-==========================
+* **Bob's Logistics 支持**——为 T0 基础带和 T5 终极带生成装卸机/堆叠机，速度与 Bob 的传送带一致，T0→T5 全链可用升级规划器；
+* **堆叠装卸机**（需要太空时代）——每档装卸机的堆叠版本，能一次搬运整堆物品并把它们分层堆放到传送带上；
+* **完整简体中文**——实体、物品、配方、科技、设置项、模组名与描述；
+* **两个独立的生成开关**——「生成堆叠机」与「生成堆叠物品」可以分开关闭。
 
-这里只说明本仓库相对上游 [shanemadden/factorio-deadlock-beltboxes-loaders](https://github.com/shanemadden/factorio-deadlock-beltboxes-loaders) 的改动。
+| 项目 | 内容 |
+| --- | --- |
+| 模组名 | `deadlock-beltboxes-loaders-CN` |
+| 版本 | 2.8.2（见 [changelog.txt](changelog.txt)） |
+| 游戏版本 | Factorio 2.0 |
+| 可选依赖 | Space Age、Bob's Logistics、ReStack |
+| 发布页 | [Factorio Mod Portal](https://mods.factorio.com/mod/deadlock-beltboxes-loaders-CN) · [GitHub](https://github.com/tang-bai/factorio-deadlock-beltboxes-loaders) |
 
-版本 2.8.2：堆叠机开关拆成两个
-------
+## 目录
 
-* **「生成堆叠机」与「生成堆叠物品」两个独立开关**（都在启动设置里）：
+* [1. 这个模组做了什么](#1-这个模组做了什么)
+* [2. 新增物品一览](#2-新增物品一览)
+  * [2.1 装卸机](#21-装卸机)
+  * [2.2 堆叠机](#22-堆叠机)
+  * [2.3 堆叠装卸机](#23-堆叠装卸机)
+  * [2.4 堆叠物品](#24-堆叠物品)
+* [3. 使用方法](#3-使用方法)
+* [4. 设置项](#4-设置项)
+* [5. 兼容性与依赖](#5-兼容性与依赖)
+* [6. 安装与存档](#6-安装与存档)
+* [7. 版本历史](#7-版本历史)
+* [8. 模组开发](#8-模组开发)
+* [9. 常见问题](#9-常见问题)
+* [10. 鸣谢与许可](#10-鸣谢与许可)
 
-  | 生成堆叠机 | 生成堆叠物品 | 结果 |
-  | --- | --- | --- |
-  | 开 | 开 | 默认，与以前一样：各档堆叠机 + 5x 压缩体系 |
-  | 关 | 开 | 不生成堆叠机，但堆叠物品、堆叠/拆堆配方与堆叠科技仍然存在（此时只能手动拆堆） |
-  | 开 | 关 | 生成堆叠机，但没有可执行的压缩配方（等于空机器） |
-  | 关 | 关 | 相当于以前的「禁用堆叠机」，整套压缩体系消失 |
+---
 
-* 为了让「关机器、留物品」成立，堆叠科技不再只能由堆叠机顺带创建：机器关闭时会单独生成只解锁压缩配方的科技（[prototypes/create_beltbox.lua](prototypes/create_beltbox.lua) 里的 `DBL.ensure_stack_technology`），不会出现「配方没有科技可挂」的情况。
-* 两个开关都是启动设置，改完需要重新开始游戏才生效；默认值仍是全开，**已有存档的行为不变**。
+## 1. 这个模组做了什么
 
-版本 2.8.1：堆叠装卸机单独一行
-------
+### 1.1 它解决的问题
 
-* 堆叠装卸机改用**独立的物品子组** `stack-loaders`（物流分组内顺序：装卸机 → 堆叠装卸机 → 堆叠机）。制作菜单与物品栏按子组分行，所以各档堆叠装卸机会整齐地排在自己那一行，不再和普通装卸机交替出现。
-* 新的子组在 [locale/zh-CN](locale/zh-CN/deadlock-beltboxes-loaders.cfg) / [locale/en](locale/en/deadlock-beltboxes-loaders.cfg) 里有 `[item-subgroup-name]` 显示名（堆叠装卸机 / Stack loaders）。
-* 只改了物品与配方的 `subgroup` 字段，原型名、配方、解锁科技都没有变化，存档可以直接继续用。
+原版传送带按「个」计算运力：一条黄带 15 个/秒。矿石、板子、电路这类物品产量一大，带子很快就被塞满，而重新拉一条并行带既占地方，又要多花铁。
 
-版本 2.8.0：堆叠装卸机
-------
+DSB 给这些物品各加一个压缩版本：
 
-* **每一档装卸机都有一个堆叠版本**：黄带、红带、蓝带、涡轮（太空时代）、Bob 的基础带与终极带各生成一台「堆叠装卸机」（原型名 `<传送带名>-stack-loader`）。它的功能与同档装卸机完全一致，另外加上太空时代**堆叠机械臂**的堆叠能力：
+1. 用**堆叠机**把 5 个铁板压成 1 个「铁板（堆叠成 5）」（默认比例，可在设置里改）；
+2. 带子上跑压缩版——1 个占 1 格，实际相当于 5 个铁板；
+3. 在需要基础物品的地方（组装机、熔炉、发射井……）再用同一台堆叠机拆开。
 
-  | 引擎字段 | 取值 | 作用 |
-  | --- | --- | --- |
-  | `bulk` | `true` | 允许一次搬运一整堆物品 |
-  | `stack_size_bonus` | 堆叠量（默认 4） | 一次搬运的物品数量 |
-  | `max_belt_stack_size` | 堆叠量（默认 4） | 往传送带上堆放的最大层数 |
+**装卸机**负责把堆叠机接进传送带，也适合把箱子、机器、车厢直接接到带子上。它不需要机械臂，速度与同档传送带相同。
 
-  这三个都是 `loader-1x1` 原生支持的属性（[prototypes/create_loader.lua](prototypes/create_loader.lua) 里的 `create_loader_entity`），不需要 `control.lua` 里的运行期脚本，因此没有额外 UPS 开销。
+### 1.2 新增内容的角色
 
-* **解锁与配方**：配方为「同档装卸机 ×1 + 堆叠机械臂 ×1 + 处理单元 ×1」，挂在太空时代自带的**堆叠机械臂科技**（`stack-inserter`）上一起解锁。没装太空时代时整套不生成，装卸机和堆叠机照旧工作。
-
-* **两个新设置项**（[settings.lua](settings.lua)）：
-
-  | 设置项 | 类型 | 默认值 | 说明 |
-  | --- | --- | --- | --- |
-  | 启用堆叠装卸机 | 启动时布尔 | 开 | 关掉后不生成堆叠装卸机 |
-  | 堆叠装卸机堆叠量 | 启动时整数 | 4 | 4/5/6/7/8/10/12/16；默认 4 与堆叠机械臂一致 |
-
-* **图标与说明**：沿用同档装卸机的着色图标，右下角叠加太空时代的堆叠机械臂图标作为徽标；实体说明单独写成「成批搬运整堆物品 + 分层堆放」。
-
-* **传送带上限**：`max_belt_stack_size` 只是这台机器自己的上限，实际能堆几层还受势力当前的「传送带容量」研究（`belt-stack-size-bonus`）限制，和堆叠机械臂完全一致。
-
-* **存档**：只新增了原型，没有改名或改动现有实体，旧存档可以直接继续用；首次加载会提示模组版本变化。
-
-* **升级链**：堆叠装卸机之间按传送带速度串好 `next_upgrade`（Bob 基础 → 黄 → 红 → 蓝 → 涡轮 → Bob 终极），升级规划器与快速替换可以直接用；`fast_replaceable_group` 与同档装卸机相同，所以堆叠版和普通版之间也能互相快速替换。
-
-* **命名**：本模组自建的 6 档在 [locale/zh-CN](locale/zh-CN/deadlock-beltboxes-loaders.cfg) 里有专门译名（堆叠装卸机、快速堆叠装卸机、迅速堆叠装卸机、涡轮堆叠装卸机、基础堆叠装卸机、终极堆叠装卸机）；其它模组调用 `add_tier()` 建的档位回退为「<装卸机名>（堆叠）」，不需要额外翻译。
-
-* **API**：`deadlock.add_tier()` 新增三个可选字段 `stack_loader`、`stack_loader_item`、`stack_loader_localised_name`；另外导出 `deadlock.update_stack_loaders()`，供在 `data-final-fixes` 之后才创建等级（或推迟解锁）的模组补做解锁与升级链。
-
-版本 2.7.0：首个 CN 发行版
-------
-
-* 面向 mod 门户发布的第一个版本，版本线延续上游（2.6.x → 2.7.0），汇总下面 2.6.1–2.6.3 的全部改动：Bob's Logistics 传送带等级支持、廉价升级配方、完整简体中文、模组内部名称改为 `deadlock-beltboxes-loaders-CN`。
-* 仓库带有 GitHub Actions 自动发布流程（[\.github/workflows/push.yml](.github/workflows/push.yml)）：**每次 push 都会读取 info.json 自动上传到 mod 门户**，所以发新版本前必须先在 info.json 升版本号并在 changelog.txt 里补上同版本号的条目（门户不允许同一版本重复上传）。
-
-版本 2.6.3：改为独立的 CN 版
-------
-
-* **模组内部名称改为 `deadlock-beltboxes-loaders-CN`**（[info.json](info.json) 的 `name`，标题加上 `(CN)`），这样可以作为一个独立模组发布，不与上游同名冲突。
-* 需要一起改名的地方都已处理：4 个 Lua 文件里共 26 处 `__deadlock-beltboxes-loaders__` 资源路径、`locale/zh-CN` 里的 `[mod-name]`/`[mod-description]` 键名、`migrations/` 里两个带模组名前缀的迁移文件。
-* **代价（重要）**：其它模组里针对旧名称的条件判断不再生效，例如 Factorio-Tiberium 的 `if mods["deadlock-beltboxes-loaders"] then`（为钛矿物品生成堆叠配方）——改名后就失效了。调用本模组 API（全局 `deadlock` 表）的模组不受影响。想让这些模组继续生效，需要它们自己兼容新名称，或者你给它们打补丁。
-* **存档**：原型名称没有变化，已有存档可以继续使用；首次加载会提示模组列表有变动（旧模组被移除、新模组加入）。
-* 打包文件名与 zip 内目录名随之变为 `deadlock-beltboxes-loaders-CN_<版本>`。
-
-版本 2.6.1：支持 Bob's Logistics
-------
-
-Bob's Logistics 会重新定义各级传送带的速度，并额外提供「基础传送带」（T0）和「终极传送带」（T5）两档。本版本让 DSB 跟上这些等级：
-
-* **新增 [prototypes/bob_tiers.lua](prototypes/bob_tiers.lua)**，为下面这些等级生成装卸机和堆叠机：
-
-  | 等级 | 传送带 | 解锁科技 | 说明 |
-  | --- | --- | --- | --- |
-  | T0 基础 | `bob-basic-transport-belt` | `logistics-0` | 仅在 Bob 开启「传送带重置」时存在 |
-  | T4 涡轮 | `turbo-transport-belt` | `logistics-4` | 装了 Space Age 时该等级已经有了，只同步速度、不重复生成 |
-  | T5 终极 | `bob-ultimate-transport-belt` | `logistics-5` | 由 Bob 的最高级传送带科技解锁 |
-
-* **速度自动匹配 Bob 的设置**：装卸机的 `speed` 直接取 `data.raw["transport-belt"][带名].speed`（在 `data-updates` 阶段读取，此时 Bob 的速度已经算好），堆叠机的 `crafting_speed` = 传送带速度 × 32。因此无论 Bob 的「传送带速度重置 / 每级速度 / 初始速度」怎么设置，每一档装卸机都和它对应的传送带同速。
-* **整条等级链都可以升级**：T0 → T1 → T2 → T3 → T4 → T5 全部设置了 `next_upgrade`，升级规划器与快速替换（装卸机和堆叠机都有）可以从基础带一路升到终极带。
-* **每一级升级的配方**：上一级装卸机 ×1 + 铁板 ×2 + 铁齿轮 ×2（T0 没有上一级，改用基础传送带 ×1）；并统一为 `crafting` 分类，所以原来需要润滑液/钨板、只能在铸造厂生产的 T3/T4 装卸机现在也可以直接手搓。
-* **配方成本和范围都能改**，全部集中在 `prototypes/bob_tiers.lua` 顶部的 `CONFIG` 表里：
-
-  | 字段 | 默认值 | 作用 |
-  | --- | --- | --- |
-  | `upgrade_iron_plate` | 2 | 每级升级消耗的铁板数 |
-  | `upgrade_iron_gear` | 2 | 每级升级消耗的铁齿轮数 |
-  | `upgrade_from_previous` | true | 是否消耗上一级装卸机；设为 false 则用本等级的传送带当材料 |
-  | `reprice_existing_tiers` | true | 是否把原有的 T1–T3（以及 Space Age 的 T4）也改成同一套升级配方 |
-  | `create_basic_tier` | true | 是否给 Bob 的 T0 基础带做装卸机/堆叠机 |
-  | `beltbox_recipes` | `"extend"` | 新等级的堆叠机配方：`"extend"` 沿用本模组原有风格；`"upgrade"` 与装卸机同样廉价；`"none"` 不为新等级生成堆叠机 |
-
-* **[data-updates.lua](data-updates.lua)**：检测到 `boblogistics` 时加载 `prototypes.bob_tiers`（放在 data-updates 阶段，能让 Bob 的速度和科技先算完）。
-* **[info.json](info.json)**：新增可选依赖 `"? boblogistics"`，保证 Bob 的 data.lua 先执行。
-* **[locale/en/deadlock-beltboxes-loaders.cfg](locale/en/deadlock-beltboxes-loaders.cfg)**：补上新等级的英文名。
-
-版本 2.6.2：简体中文本地化
-------
-
-* **新增 [locale/zh-CN/deadlock-beltboxes-loaders.cfg](locale/zh-CN/deadlock-beltboxes-loaders.cfg)**：本模组自带完整简体中文，覆盖实体/物品/配方名、实体说明、科技名与说明、全部设置项（名称与说明）、模组名与描述。用词沿用社区汉化包 `chinese` 的习惯译法（简洁装卸机、堆叠机、平分解压、堆叠比例……），并补上汉化包没有的涡轮档、Bob 两档，以及汉化包缺失的两条开关说明。装不装汉化包都会显示中文；同时因为本模组加载在汉化包之后，同名的键以本模组的文本为准（两者文本一致）。
-* **[changelog.txt](changelog.txt)**、**[description.md](description.md)**（英文原文另存为 [description.en.md](description.en.md)）与本文档 [README.md](README.md) 一并汉化，英文 README 原文另存为 [README.en.md](README.en.md)。
-* **[info.json](info.json)**：`description` 写明内置 Bob's Logistics 支持与简体中文，`author` 加上本分支维护者。
-
-以上改动如何验证
-------
-
-改动都用 Factorio 2.0.77 实际加载 `boblogistics 2.1.1`（外带 `space-age` 与 `chinese` 汉化包）校验过：`--dump-data` 检查每级装卸机速度是否与传送带一致、配方与升级链是否正确；`--dump-prototype-locale` 检查游戏内实际显示的中文文本。
-
-堆叠装卸机（2.8.0）另外单独验证过：`--dump-data` 里 6 档的实体/物品/配方全部生成、`bulk`/`stack_size_bonus`/`max_belt_stack_size` 与对应传送带速度一致、6 个配方都挂在 `stack-inserter` 科技的 `unlock-recipe` 列表里；把 `space-age` 显式禁用后重新导出，确认一台堆叠装卸机都不会生成，且原有装卸机/堆叠机完好。打包成 zip 后再加载一次，同样 6 档齐全。
-
-自行打包 / 重新打包
-------
-
-改完之后重新打成 `<模组名>_<版本>.zip`（zip 内要带一层 `<模组名>_<版本>/` 目录，名字直接取自 `info.json`），放进 `%APPDATA%\Factorio\mods\` 即可。在仓库根目录用 PowerShell 执行：
-
-~~~~
-$info  = Get-Content info.json -Raw -Encoding UTF8 | ConvertFrom-Json   # Windows PowerShell 5.1 必须带 -Encoding UTF8，否则中文会乱码
-$base  = "$($info.name)_$($info.version)"
-$stage = "$env:TEMP\dsb\$base"
-Remove-Item -Recurse -Force "$env:TEMP\dsb" -ErrorAction SilentlyContinue
-New-Item -ItemType Directory -Path $stage | Out-Null
-Get-ChildItem -Force . | Where-Object { $_.Name -notin @('.git','.github') } |
-  ForEach-Object { Copy-Item $_.FullName $stage -Recurse -Force }
-
-Add-Type -AssemblyName System.IO.Compression        # ZipArchiveMode 在这个程序集里
-Add-Type -AssemblyName System.IO.Compression.FileSystem
-$zip = "$env:APPDATA\Factorio\mods\$base.zip"
-if (Test-Path $zip) { Remove-Item -Force $zip }
-$zipStream = [System.IO.File]::Open($zip, [System.IO.FileMode]::CreateNew)
-$archive   = New-Object System.IO.Compression.ZipArchive($zipStream, [System.IO.Compression.ZipArchiveMode]::Create)
-Get-ChildItem -Recurse -File $stage | ForEach-Object {
-  $rel   = $_.FullName.Substring($stage.Length + 1) -replace '\\', '/'
-  $entry = $archive.CreateEntry("$base/$rel", [System.IO.Compression.CompressionLevel]::Optimal)
-  $s = $entry.Open(); $bytes = [System.IO.File]::ReadAllBytes($_.FullName)
-  $s.Write($bytes, 0, $bytes.Length); $s.Dispose()
-}
-$archive.Dispose(); $zipStream.Dispose()
-~~~~
-
-> 注意：zip 内部的路径分隔符必须是正斜杠 `/`。用 `[System.IO.Compression.ZipFile]::CreateFromDirectory()` 或 `Compress-Archive` 在 Windows PowerShell 里可能写成反斜杠 `\`，那样的包游戏会因为找不到文件而加载失败。
-
-步骤 1
-------
-
-在你模组的 **info.json** 中把 “?deadlock-beltboxes-loaders-CN” 加为可选依赖（想同时兼容上游原版，就把 `"?deadlock-beltboxes-loaders"` 也一起写上）。例如：
-
-~~~~
-{
-  "name": "DeadlockTweaks",
-  "version": "0.1.0",
-  "title": "Deadlock's Tweaks",
-  "author": "Deadlock989",
-  "contact": "",
-  "homepage": "",
-  "dependencies": ["base >= 0.17.0", "?deadlock-beltboxes-loaders-CN"],
-  "description": "Some small quality of life adjustments.",
-  "factorio_version": "0.17"
-}
-~~~~
-
-步骤 2
-------
-
-DSB 提供了一组函数，帮你完成堆叠物品的创建（以及可选的堆叠机和装卸机等级创建）。这些函数应当在你自己模组的 **data-final-fixes.lua** 中调用。调用之前请先判断 **deadlock** 是否存在，这样在没装 DSB 时你的模组也不会报错。例如：
-
-~~~~
--- [data-final-fixes.lua]
--- 这个模组会制造钻石。别往下挖
--- 我们已经在前面创建好了自己的物品
-
--- 让 DSB 给我的物品做堆叠版
-if deadlock then
-  -- 对每一个你想堆叠的物品重复这一步
-  deadlock.add_stack("deadlock-uber-diamond", "__DeadlockTweaks__/graphics/icons/stacked-diamond.png", "deadlock-stacking-1", 64)
-end
-~~~~
-
-另外，如果你有一长串物品要分别塞进不同的科技里，可以把它们放进数组/表里循环处理。
-
-这是最简单的用法。DSB 还提供了其它一些函数，说明见下面几节。
-
-deadlock.add_stack()
-----------------------------
-
-这个函数用来堆叠 DSB 默认不处理的物品。它最多接受六个参数，完整调用形式如下：
-**deadlock.add_stack(item_name, graphic_path, target_tech, icon_size, item_type, mipmap_levels)**
-
-| **参数** | **可选 / 必填** | **说明** |
+| 新增内容 | 一句话说明 | 典型用途 |
 | --- | --- | --- |
-| **item_name** | 必填 | 字符串。要堆叠的物品名，例如 “iron-plate”。 |
-| **graphic_path** | 可选 | 字符串。你的堆叠物品图标路径。可以省略，但会影响性能（见下文「更多细节」）。 |
-| **target_tech** | 可选 | 字符串。堆叠配方要解锁到的科技名（例如 “deadlock-stacking-1”）。如果填写，该科技**必须已经存在**于 data.raw 中。如果省略或传 nil，本模组不会修改任何科技，你需要自己想办法让玩家拿到这些配方。 |
-| **icon_size** | 可选 | 整数。自定义图标的像素尺寸，默认 64。不提供图标时无效。 |
-| **item_type** | 可选 | 字符串。物品类型，例如 "item"、"ammo"、"repair-tool" 等，默认 "item"。 |
-| **mipmap_levels** | 可选 | 整数。自定义图标的 mipmap 层级，默认 nil。不提供图标时无效。 |
+| 装卸机 | 1x1 传送带接口，速度 = 同档传送带 | 免机械臂装卸、箱子与机器直连、机器进出带 |
+| 堆叠机 | 1x1 的压缩/平分解压机器 | 产线中在线压缩，把带子运力提高（默认 5 倍） |
+| 堆叠装卸机 | 装卸机 + 堆叠机械臂的成批搬运能力 | 一次搬整堆物品、往带子上分层堆放 |
+| 堆叠物品 | `deadlock-stack-*` 系列的独立物品 | 带子上的压缩包，使用前通常要先拆堆 |
 
-可选参数可以直接省略，也可以显式传 nil 使用默认值。
+### 1.3 适合和不适合
 
-注意：如果你指定的物品已经做过堆叠，可能会出现意料之外的结果。建议先用下面介绍的 destroy_stack() 把原来的物品删掉，再重新创建。
+**适合**：长距离主干带、矿场到冶炼厂、总线上的板子与电路，以及任何「同一种物品被大量运输」的场合。
 
-deadlock.destroy_stack()
---------------------------------
+**不适合**：
 
-只接受一个参数，即物品名：
-**deadlock.destroy_stack(item_name)**
+* 想把堆叠物品直接当配方原料——它是独立物品，必须先平分解压；
+* 想靠它减少箱子或车厢占用的格子——堆叠物品的堆叠数会按比例缩小，总容量基本不变（不能整除时略有损失）；
+* 流体——堆叠机只处理固体物品。
 
-调用后会把该物品的堆叠版本销毁，并删除**所有**以该堆叠物品为原料或产物的配方（至少包括堆叠/拆堆配方，理论上也可能包括其它模组把堆叠物品当原料的配方），同时从**所有**科技中移除对已被删除配方的**全部**引用。
+> 机器与物品都是数据阶段生成的原生原型。运行期脚本只处理放置时的吸附，以及在开启「自动平分解压」后的拆堆，因此平时几乎没有 UPS 开销。
 
-请记住，可能还有别的模组指望着某个堆叠物品存在。如果你删掉它却不再建回来，由此产生的问题需要你自己负责。你也可以用这个函数先清掉某个堆叠物品、再用 add_stack() 重建它，例如用来解决两个大改模组之间的冲突。
+---
 
-deadlock.destroy_vanilla_stacks()
------------------------------------------
+## 2. 新增物品一览
 
-不接受参数，会删除 DSB 默认创建的全部原版堆叠物品和配方。效果等同于对模组在早期 data 阶段建立的每一个物品调用 destroy_stack()。当你想推倒重来时可以用它。
+所有内容按传送带**档位**组织。默认 3 档（黄、红、蓝）；装了太空时代会多出涡轮档；Bob's Logistics 再补 T0 基础、T5 终极（以及没装太空时代时的涡轮档）。表里的「原型名」就是 `data.raw` 里的名字，可在控制台、模组代码或蓝图里直接引用。
 
-deadlock.add_tier()
----------------------------
+> 表中的 15/30/45/60 是原版默认运力。Bob's Logistics 的传送带速度设置会改掉这些数字；装卸机与堆叠机在数据阶段读取实际速度，会自动跟随。
 
-默认情况下 DSB 会创建三档堆叠机和装卸机（对应原版的黄带、红带、蓝带），并创建三个科技，各自解锁对应的机器和一批堆叠配方。你可以用这个函数创建新的机器等级，让它们由新的科技解锁，以对应其它模组提供的传送带（或者任何有理由存在的等级）；也可以用它替换掉默认的等级设置。
-
-该函数只接受一个表作为参数，表中的键值对如下：
-
-| **参数** | **可选 / 必填** | **说明** |
+| 新增物品 | 数量 | 说明 |
 | --- | --- | --- |
-| **transport_belt** | 必填 | 字符串。对应传送带的前缀名（例如 "uber-"），用来计算速度。 |
-| **underground_belt** | 指定了 beltbox_ingredients 和 loader_ingredients 时可省略 | 字符串。对应地下传送带的名字。默认情况下 DSB 会以地下传送带的配方来计算堆叠机和装卸机的配方；省略它就必须自己指定配方材料。 |
-| **splitter** | 可选 | 字符串。本模组目前用不到，如果有外观点缀模组存在会传给它。 |
-| **colour** | 可选 | 颜色表。机器的染色，默认粉色。 |
-| **technology** | 建议填写 | 字符串。对应物流科技的名字，用来解锁装卸机。不填则不会解锁堆叠配方。 |
-| **order** | 建议填写 | 字符串。堆叠机和装卸机的排序串。 |
-| **beltbox** | 可选 | 字符串。要创建的堆叠机原型名，默认是 transport_belt.."-beltbox"。 |
-| **beltbox_technology** | 可选 | 字符串。解锁同档堆叠机与堆叠物品的科技名。默认等于 beltbox 的名字，也可以覆盖——原版各档用的是 "deadlock-stacking-[1-3]" 以兼容旧存档。 |
-| **beltbox_ingredients** | 指定了 underground_belt 时可省略 | IngredientPrototype 表。堆叠机配方的材料，默认按 underground_belt 推导。 |
-| **beltbox_recipe** | 可选 | 字符串。用来覆盖堆叠机配方的原型名。 |
-| **beltbox_item** | 可选 | 字符串。用来覆盖堆叠机物品的原型名。 |
-| **beltbox_category** | 可选 | 字符串。堆叠机的制造分类，默认 "crafting"；配方里有流体时用 "crafting-with-fluid"。 |
-| **loader** | 可选 | 字符串。要创建的装卸机原型名，默认是 transport_belt.."-loader"。 |
-| **loader_ingredients** | 指定了 underground_belt 时可省略 | IngredientPrototype 表。装卸机配方的材料，默认按 underground_belt 推导。 |
-| **loader_recipe** | 可选 | 字符串。用来覆盖装卸机配方的原型名。 |
-| **loader_item** | 可选 | 字符串。用来覆盖装卸机物品的原型名。 |
-| **loader_category** | 可选 | 字符串。装卸机的制造分类，默认 "crafting"；配方里有流体时用 "crafting-with-fluid"。 |
+| 装卸机 | 最多 6 档 | 黄、红、蓝，以及涡轮（太空时代）、基础与终极（Bob's Logistics） |
+| 堆叠机 | 最多 6 档 | 与装卸机同档，负责压缩与平分解压 |
+| 堆叠装卸机 | 最多 6 档 | 需要太空时代，是每档装卸机的堆叠版本 |
+| 堆叠物品 | 原版 23 种 | `deadlock-stack-*`，按科技分三批解锁；其它物品可通过 API 添加 |
 
-下面是一个例子，来自为本模组添加第四档堆叠机和装卸机的整合模组：
+### 2.1 装卸机
 
-~~~~
-deadlock.add_tier({
-	transport_belt      = "rapid-transport-belt-mk1",
-	colour              = {r=10, g=225, b=25},
-	underground_belt    = "rapid-transport-belt-to-ground-mk1",
-	splitter            = "rapid-splitter-mk1",
-	technology          = "logistics-4",
-	order               = "d",
-	loader_ingredients  = {
-		{"express-transport-belt-loader",1},
-		{"iron-gear-wheel",20},
-		{amount = 40,name = "lubricant",type = "fluid"},
-	},
-	loader_category     = "crafting-with-fluid",
-	beltbox_ingredients = {
-		{"express-transport-belt-beltbox",1},
-		{"iron-plate",40},
-		{"iron-gear-wheel",40},
-		{"processing-unit",5},
-	},
-	beltbox_technology  = "deadlock-stacking-4",
-})
-~~~~
+1x1 的传送带接口（原生 `loader-1x1` 类型），不耗电，生命值 170：
 
-更多细节
-------------
+* 一侧贴传送带，另一侧贴库存；放置后用 `R` 旋转，切换输入/输出方向；
+* 速度等于同档传送带，所以它能跑满整条带子，不会成为瓶颈；
+* 5 个过滤槽，可以只让指定的几种物品通过；
+* 默认与传送带同属快速替换组，可以直接把带子「刷」成装卸机，也能刷回去；打开「精确装卸机快速更换」后，只与装卸机互换；
+* 放置时可以按运行时设置自动吸附传送带与库存。
 
-**Data 阶段。** 这些函数应该在什么时候调用？在 **data-final-fixes.lua** 里。某些函数在个别情况下更早调用也能工作，但不保证。模组之间围绕着 data.lua、data-updates.lua、data-final-fixes.lua 存在一场「军备竞赛」：大家都在改动原版配方、自己的配方，以及去改别的模组。总的趋势是越做越晚，因为模组都想拦住或抵消别人的改动，这一点我们也没什么好办法。
+| 档位 | 物品（中文 / 英文） | 原型名 | 速度 | 解锁科技 |
+| --- | --- | --- | --- | --- |
+| T0 基础 <sup>Bob</sup> | 基础简洁装卸机 / Basic compact loader | `bob-basic-transport-belt-loader` | 同 Bob 基础带 | `logistics-0`（Bob 的基础物流科技） |
+| T1 黄 | 简洁装卸机 / Compact loader | `transport-belt-loader` | 15 个/秒 | `logistics`（物流学） |
+| T2 红 | 快速简洁装卸机 / Fast compact loader | `fast-transport-belt-loader` | 30 个/秒 | `logistics-2`（物流学 2） |
+| T3 蓝 | 迅速简洁装卸机 / Express compact loader | `express-transport-belt-loader` | 45 个/秒 | `logistics-3`（物流学 3） |
+| T4 涡轮 | 涡轮简洁装卸机 / Turbo compact loader | `turbo-transport-belt-loader` | 60 个/秒 <sup>SA</sup> | `turbo-transport-belt`（涡轮传送带）<sup>SA</sup> / `logistics-4` <sup>Bob</sup> |
+| T5 终极 <sup>Bob</sup> | 终极简洁装卸机 / Ultimate compact loader | `bob-ultimate-transport-belt-loader` | 同 Bob 终极带 | `logistics-5`（Bob 的最高级物流科技） |
 
-**自动图标。** 使用 add_stack() 时，如果把图标路径和图标尺寸都传 nil，DSB 会用基础物品的图标自动拼出一个三层图标。这样做有两个问题：一是效果不一定好看，二是会拖累渲染性能。请记住屏幕上同时可能显示成千上万个这样的物品，用拼接图标至少会让渲染开销变成 4 倍，如果基础物品本身已经是多层图标还会更高。请尽量自己准备堆叠物品的图标，否则用低配显卡的玩家就要遭殃了。这个功能只是为了兼容老模组才保留的：创建多层图标时，游戏标准日志会被警告刷屏。
+<sup>Bob</sup>：只有安装 Bob's Logistics 才会生成；T0 还要求 Bob 的「基础传送带」存在（传送带重置设置）。<br>
+<sup>SA</sup>：只有安装太空时代才会生成；如果涡轮带由 Bob's Logistics 提供（没装太空时代），同一台装卸机改由 `logistics-4` 解锁。
 
-**科技与迁移。** 如果你把堆叠物品加进了 DSB 的科技，之后又改动或删除了它们提供的内容，**你需要自己负责迁移**。可以参考 DSB 的 migrations 文件夹。
+**默认配方（未安装 Bob's Logistics）**
 
-**报错。** 有些情况下，你用某些参数调用 API 创建物品或等级，会导致游戏根本无法加载；这种情况下加载过程会中断并给出错误信息，**请认真读它**。另一些情况下，你指定的内容能让游戏加载，但就是说不通；这时游戏会继续加载，但函数调用可能被跳过，并在标准日志里打印错误或警告。所以如果你的堆叠物品或堆叠机没出现，先去翻日志。
+| 档位 | 配方 | 制造分类 |
+| --- | --- | --- |
+| T1 | 传送带 ×1 + 铁板 ×5 | 手工 |
+| T2 | 简洁装卸机 ×1 + 铁齿轮 ×20 | 手工 |
+| T3 | 快速简洁装卸机 ×1 + 铁齿轮 ×40 + 润滑液 ×20 | 带流体；装了太空时代时也可在铸造厂制造 |
+| T4 | 迅速简洁装卸机 ×1 + 钨板 ×20 + 润滑液 ×20 | 带流体或冶金（铸造厂） |
 
-**「辅助」或「桥接」模组。** 如果你喜欢的模组作者没时间/不愿意为堆叠做支持，你可以自己写一个小「辅助」模组来搭桥。这时你要把对方模组和 DSB 都写成强制依赖（而不是可选依赖），然后你的小模组只负责遍历一些物品，并在对方模组提供不同传送带时创建一个新等级。
+**安装 Bob's Logistics 后**，整条 T0→T5 链（包括原版各档）会统一成同一种升级配方：
 
-如果遇到问题、自己尝试解决后仍然卡住，请到 [Factorio 论坛帖](https://forums.factorio.com/viewtopic.php?f=94&t=57264)联系我们，附上错误信息并贴出你的代码——光凭一句模糊的描述我们猜不出来。
+> 上一级装卸机 ×1 + 铁板 ×2 + 铁齿轮 ×2
 
-本模组最初由 Deadlock989 创作，移植到 0.17 之后由 shanemadden 维护，Deadlock989 亦有贡献。中文分支（Bob's Logistics 支持与简体中文）由 tang-bai 维护。
+T0 没有上一级，用「Bob 基础传送带 ×1」起步。所有档位的分类都改成「手工」，蓝带和涡轮档不再依赖铸造厂。想调成本，改 [prototypes/bob_tiers.lua](prototypes/bob_tiers.lua) 顶部的 `CONFIG`（`upgrade_iron_plate`、`upgrade_iron_gear`、`upgrade_from_previous`、`reprice_existing_tiers`）。
+
+### 2.2 堆叠机
+
+1x1 的电力机器（原型类型是 `furnace`，但只接受 `stacking` 与 `unstacking` 两类配方，不能当熔炉用）：
+
+* 1 格输入、1 格输出、0 个插件槽，不用燃料；
+* **同一台机器既能压缩也能平分解压**，具体执行哪条配方由输入物品决定；
+* 黄带档耗电 90 kW，待机 15 kW；高档位按传送带速度等比提高；
+* 可以像熔炉一样被机械臂喂料，但用装卸机才能跑满整条带子。
+
+**处理能力与传送带严格对齐。** 堆叠配方按「每处理 1 个基础物品 1/15 秒」生成（堆叠比例变化时同步缩放），而机器的制作速度是传送带速度的 32 倍；两者正好抵消，所以它每秒处理的基础物品数**刚好等于同档传送带的运力**——既不会成为瓶颈，也不会让带子空转。
+
+| 档位 | 物品（中文 / 英文） | 原型名 | 处理能力 | 压缩后（比例 5） | 解锁科技 |
+| --- | --- | --- | --- | --- | --- |
+| T0 基础 <sup>Bob</sup> | 基础堆叠机 / Basic stacking beltbox | `bob-basic-transport-belt-beltbox` | 同 Bob 基础带 | 带速 ÷ 5 | `logistics-0` |
+| T1 黄 | 堆叠机 / Stacking beltbox | `transport-belt-beltbox` | 15 个/秒 | 3 个堆叠物品/秒 | 堆叠科技 1（`deadlock-stacking-1`） |
+| T2 红 | 快速堆叠机 / Fast stacking beltbox | `fast-transport-belt-beltbox` | 30 个/秒 | 6 个/秒 | 堆叠科技 2（`deadlock-stacking-2`） |
+| T3 蓝 | 迅速堆叠机 / Express stacking beltbox | `express-transport-belt-beltbox` | 45 个/秒 | 9 个/秒 | 堆叠科技 3（`deadlock-stacking-3`） |
+| T4 涡轮 | 涡轮堆叠机 / Turbo stacking beltbox | `turbo-transport-belt-beltbox` | 60 个/秒 <sup>SA</sup> | 12 个/秒 | 堆叠科技 4（`deadlock-stacking-4`） |
+| T5 终极 <sup>Bob</sup> | 终极堆叠机 / Ultimate stacking beltbox | `bob-ultimate-transport-belt-beltbox` | 同 Bob 终极带 | 带速 ÷ 5 | 堆叠科技 5（`deadlock-stacking-5`） |
+
+**默认配方（未安装 Bob's Logistics）**
+
+| 档位 | 配方 | 制造分类 |
+| --- | --- | --- |
+| T1 | 传送带 ×4 + 铁板 ×10 + 铁齿轮 ×10 + 电子电路 ×4 | 手工 |
+| T2 | 堆叠机 ×1 + 铁板 ×20 + 铁齿轮 ×20 + 高级电路 ×2 | 手工 |
+| T3 | 快速堆叠机 ×1 + 铁板 ×30 + 铁齿轮 ×30 + 润滑液 ×100 | 带流体（装了太空时代时含冶金） |
+| T4 | 迅速堆叠机 ×1 + 钨板 ×15 + 铁齿轮 ×15 + 润滑液 ×100 | 带流体或冶金 |
+
+**Bob's Logistics 额外档位**
+
+| 档位 | 配方 | 制造分类 |
+| --- | --- | --- |
+| T0 基础 | 基础传送带 ×4 + 铁板 ×5 + 铁齿轮 ×5 | 手工 |
+| T5 终极 | 涡轮堆叠机 ×1 + 铁板 ×40 + 铁齿轮 ×40 + 处理器 ×10 | 手工 |
+
+如果涡轮带由 Bob 提供（没装太空时代），T4 的堆叠机配方是「迅速堆叠机 ×1 + 铁板 ×30 + 铁齿轮 ×30 + 处理器 ×5」，并且可以直接手搓。Bob 的廉价升级规则默认只改装卸机，不改堆叠机；想连堆叠机一起改，把 [prototypes/bob_tiers.lua](prototypes/bob_tiers.lua) 里的 `CONFIG.beltbox_recipes` 设为 `"upgrade"`。
+
+**堆叠科技**：
+
+* `deadlock-stacking-1` ~ `deadlock-stacking-5` 由对应物流科技复制而来：以该物流科技为前置，研究量为它的 1.5 倍，并解锁该档的堆叠机与堆叠/平分解压配方；
+* 原版与太空时代各档还会把上一档堆叠科技加为前置，形成研究顺序；
+* T0 基础档没有独立堆叠科技，堆叠机配方直接挂在 Bob 的 `logistics-0` 上；
+* 关掉「生成堆叠机」时，这些科技仍会在需要时创建，只解锁压缩/平分解压配方，不再解锁机器。
+
+### 2.3 堆叠装卸机
+
+**需要太空时代。** 每一档装卸机都有一个堆叠版本：保留装卸机的全部行为，速度也与同档装卸机相同，另外加上太空时代堆叠机械臂的能力：
+
+| 引擎字段 | 取值 | 作用 |
+| --- | --- | --- |
+| `bulk` | `true` | 允许一次搬运一整堆物品 |
+| `stack_size_bonus` | 堆叠量设置（默认 4） | 一次搬运的物品数量 |
+| `max_belt_stack_size` | 堆叠量设置（默认 4） | 往传送带上堆放的最大层数 |
+
+* 这三个都是 `loader-1x1` 原生支持的字段，**没有运行期脚本**，不增加 UPS 开销；
+* 往传送带上实际能堆几层，还受势力当前的传送带堆叠研究限制，和堆叠机械臂一致；
+* 配方统一为「同档装卸机 ×1 + 堆叠机械臂 ×1 + 处理器 ×1」，由太空时代的**堆叠机械臂科技**（`stack-inserter`）解锁；
+* 图标沿用同档装卸机，右下角叠加堆叠机械臂徽标；
+* 在物流分组里单独占一行（物品子组「堆叠装卸机」），顺序是：装卸机 → 堆叠装卸机 → 堆叠机；
+* 各档按传送带速度串成升级链，升级规划器与快速替换可以直接使用；它与同档普通装卸机共享快速替换组，两者可以互相替换。
+
+| 档位 | 物品（中文 / 英文） | 原型名 |
+| --- | --- | --- |
+| T0 基础 <sup>Bob</sup> | 基础堆叠装卸机 / Basic stack loader | `bob-basic-transport-belt-stack-loader` |
+| T1 黄 | 堆叠装卸机 / Stack loader | `transport-belt-stack-loader` |
+| T2 红 | 快速堆叠装卸机 / Fast stack loader | `fast-transport-belt-stack-loader` |
+| T3 蓝 | 迅速堆叠装卸机 / Express stack loader | `express-transport-belt-stack-loader` |
+| T4 涡轮 | 涡轮堆叠装卸机 / Turbo stack loader | `turbo-transport-belt-stack-loader` |
+| T5 终极 <sup>Bob</sup> | 终极堆叠装卸机 / Ultimate stack loader | `bob-ultimate-transport-belt-stack-loader` |
+
+其他模组通过 [API](API.md) 创建的等级，其堆叠装卸机默认显示为「装卸机名（堆叠）」。
+
+### 2.4 堆叠物品
+
+原版可压缩物品各会多出一个独立物品，原型名是 `deadlock-stack-<原物品名>`，例如：
+
+* `deadlock-stack-iron-plate` ——「铁板（堆叠成 5）」/ "Iron plate (stack of 5)"；
+* 显示名里的数字取自当前的**堆叠比例**设置；
+* 堆叠物品会排进原物品所在的分组末尾（例如铁板在「中间产品」的最后）；
+* 每个原版可压缩物品都有专门绘制的堆叠图标。
+
+**堆叠比例与容量**
+
+* 默认 5：1，即 5 个基础物品 = 1 个堆叠物品；物品自身堆叠数小于比例时，以物品的堆叠数为准；
+* 堆叠物品自身的堆叠数 = 向下取整（基础物品堆叠数 ÷ 生效比例）。例如堆叠数为 100 的物品，比例 5 时堆叠物品的堆叠数为 20——一格箱子仍然装 100 个基础物品；
+* 因此它**压缩的是传送带上的占用**，不是箱子/车厢的总容量。比例不能整除基础堆叠数时会有一点损失，模组会在日志里提示。
+
+**配方**
+
+| 配方 | 原型名 | 配方分类 | 说明 |
+| --- | --- | --- | --- |
+| 堆叠压缩 | `deadlock-stacks-stack-<物品>` | `stacking` | 5 个基础物品 → 1 个堆叠物品（按比例），只能由堆叠机执行 |
+| 平分解压 | `deadlock-stacks-unstack-<物品>` | `unstacking` | 反向；默认可以在玩家制作栏手动拆堆 |
+
+* 堆叠物品是独立物品，**不能直接当别的配方的原料**；要先把它们拆回基础物品；
+* 固体燃料、煤这类燃料的堆叠版本保留燃料属性，热值按比例提高；
+* 打开「批量堆叠」后，配方一次处理 4 组（材料、产物与时间同步 ×4），总吞吐不变，只是装带更均匀；
+* 打开「自动平分解压」后，捡起或挖出堆叠物品时会自动拆成基础物品；
+* 打开「隐藏平分解压配方」后，平分解压配方会从玩家制作栏里移除，只能靠堆叠机拆堆。
+
+**原版可堆叠物品**
+
+| 解锁科技 | 物品 |
+| --- | --- |
+| 堆叠科技 1（`deadlock-stacking-1`） | 木材、铁矿石、铜矿石、石矿、煤、铁板、铜板、钢板、石砖、钨矿石 <sup>*</sup> |
+| 堆叠科技 2（`deadlock-stacking-2`） | 铜线、铁齿轮、铁棒、硫磺、塑料棒、固体燃料、电子电路、高级电路 |
+| 堆叠科技 3（`deadlock-stacking-3`） | 处理器、电池、铀矿石、铀-235、铀-238 |
+
+<sup>*</sup> 钨矿石来自太空时代；未安装时该物品不存在，会被跳过。
+
+其它模组可以调用 `deadlock.add_stack()` 为自己的物品生成堆叠版本，见 [API.md](API.md)。
+
+---
+
+## 3. 使用方法
+
+### 3.1 最简布局
+
+压缩和平分解压共用同一台堆叠机，只是摆放方向不同：
+
+```
+压缩：  传送带 ──▶ [装卸机] ──▶ [堆叠机] ──▶ [装卸机] ──▶ 传送带
+                      输入模式      5 合 1       输出模式
+
+解压：  传送带 ──▶ [装卸机] ──▶ [堆叠机] ──▶ [装卸机] ──▶ 传送带
+                      输入模式      1 拆 5       输出模式
+```
+
+1. 研究对应档位的物流科技，再研究「堆叠科技」，解锁堆叠机与压缩配方；
+2. 造 1 台堆叠机、2 台同档装卸机（需要堆叠装卸机时还要研究堆叠机械臂科技）；
+3. 按上图摆成三格：装卸机把物品送进堆叠机的输入槽，堆叠机自动压缩，第二台装卸机把产物放回带子；
+4. 接电。堆叠机会按输入物品自动选择压缩或平分解压配方。
+
+### 3.2 使用技巧
+
+* **放置**：装卸机可以用 `R` 旋转，切换它在哪一侧取货。默认与传送带同属快速替换组，可以直接把一段带子「刷」成装卸机/堆叠机，也可以刷回带子。
+* **对齐**：两个运行时设置可以让装卸机在放下时自动对准相邻传送带（默认开）与库存（默认关）。
+* **升级**：装卸机、堆叠机、堆叠装卸机都按档位串好了升级链，升级规划器与快速替换可以直接换档。
+* **缓冲**：堆叠机有 1 格输入和 1 格输出，短时间断料或堵料不会立刻影响上下游。
+* **手动拆堆**：默认可以在玩家制作栏里手动执行平分解压；嫌配方太多可以打开「隐藏平分解压配方」。
+* **查看配方**：开启「在传送带箱上显示 alt 模式图标」后，按 `Alt` 可以在堆叠机上看到当前配方的图标。
+* **堆叠装卸机**：适合把箱子里的整堆物品直接搬到带子上，或反过来；它往带上分层堆放的最大层数由「堆叠装卸机堆叠量」控制。
+
+### 3.3 吞吐量参考
+
+| 档位 | 传送带运力 | 堆叠机处理能力 | 压缩后带子上的物品数（比例 5） |
+| --- | --- | --- | --- |
+| 黄 | 15 个/秒 | 15 个基础物品/秒 | 3 个堆叠物品/秒 |
+| 红 | 30 个/秒 | 30 个基础物品/秒 | 6 个/秒 |
+| 蓝 | 45 个/秒 | 45 个基础物品/秒 | 9 个/秒 |
+| 涡轮 | 60 个/秒 | 60 个基础物品/秒 | 12 个/秒 |
+
+Bob's Logistics 各档按 Bob 的实际带速等比变化；修改「堆叠比例」只改变最后一列，基础物品吞吐仍与带子对齐。
+
+---
+
+## 4. 设置项
+
+### 4.1 启动设置
+
+改完需要重新开始游戏（或重启）才生效。
+
+| 设置（原型名） | 默认 | 说明 |
+| --- | --- | --- |
+| 生成堆叠机（`deadlock-enable-beltboxes`） | 开 | 是否生成各档堆叠机（机器、配方与科技）。关掉后没有堆叠机，但堆叠物品由下一项单独控制。 |
+| 生成堆叠物品（`deadlock-enable-stacks`） | 开 | 是否生成堆叠物品、堆叠/平分解压配方与堆叠科技。关掉就没有压缩体系。 |
+| 启用装卸机（`deadlock-enable-loaders`） | 开 | 是否生成装卸机（以及它们的堆叠版本）。 |
+| 启用堆叠装卸机（`deadlock-enable-stack-loaders`） | 开 | 是否为每档装卸机生成堆叠版本。需要太空时代。 |
+| 堆叠装卸机堆叠量（`deadlock-stack-loader-stack-size`） | 4 | 可选 4/5/6/7/8/10/12/16；一次搬运数量，也是往带上堆放的最大层数。 |
+| 堆叠比例（`deadlock-stack-size`） | 5 | 可选 4/5/8/10/16/25/32/50/64/100/128；每个堆叠物品包含的基础物品数。**不建议在已有存档里改。** |
+| 自动平分解压（`deadlock-stacking-auto-unstack`） | 关 | 从地面、传送带或容器里捡到堆叠物品时自动拆开。 |
+| 隐藏平分解压配方（`deadlock-stacking-hide-unstacking`） | 关 | 从玩家制作栏移除平分解压配方，禁止手动拆堆。 |
+| 批量堆叠（`deadlock-stacking-batch-stacking`） | 关 | 堆叠机一次处理 4 组，均匀装带，适合超高速模组带。 |
+| 在传送带箱上显示alt模式图标（`deadlock-stacking-show-alt-info`） | 开 | alt 模式下在堆叠机上显示当前配方图标。 |
+| 精确堆叠机快速更换（`deadlock-strict-fast-replace-beltboxes`） | 关 | 打开后堆叠机只能与其它堆叠机快速替换。 |
+| 精确装卸机快速更换（`deadlock-strict-fast-replace-loaders`） | 关 | 打开后装卸机只能与其它装卸机快速替换。 |
+
+「生成堆叠机」与「生成堆叠物品」是两项独立开关：
+
+| 生成堆叠机 | 生成堆叠物品 | 结果 |
+| --- | --- | --- |
+| 开 | 开 | 默认：各档堆叠机 + 可执行的压缩体系 |
+| 关 | 开 | 不生成堆叠机，但堆叠物品、配方与科技仍在（没有机器可压缩，堆叠物品只能手动拆堆） |
+| 开 | 关 | 生成堆叠机，但没有可执行的压缩配方 |
+| 关 | 关 | 整套压缩体系消失，只剩装卸机 |
+
+### 4.2 运行时设置（每玩家）
+
+| 设置（原型名） | 默认 | 说明 |
+| --- | --- | --- |
+| 将装卸机卡到传送带上（`deadlock-loaders-snap-to-belts`） | 开 | 放置时自动设置朝向与模式，匹配相邻传送带。 |
+| 将装卸机与库存对齐（`deadlock-loaders-snap-to-inventories`） | 关 | 放置时自动输入到它所面对或背对的库存。 |
+
+---
+
+## 5. 兼容性与依赖
+
+| 依赖 | 关系 | 说明 |
+| --- | --- | --- |
+| base ≥ 2.0 | 必需 | 仅支持 Factorio 2.0。 |
+| Space Age | 可选 | 提供涡轮档、堆叠装卸机与传送带分层堆放；没有它时这些内容不会生成。 |
+| Bob's Logistics | 可选 | 增加 T0 基础、T5 终极（以及没装太空时代时的涡轮档），并启用廉价升级配方；速度自动同步 Bob 的设置。 |
+| ReStack | 可选 | 沿用上游的加载顺序安排；本分支没有针对它的特殊代码。 |
+| [deadlock-integrations](https://mods.factorio.com/mod/deadlock-integrations) | 另装 | 为 Factorio Extended（含 Plus）与 Xander Mod 的传送带等级提供整合。 |
+
+**关于模组改名。** 本分支的内部名称是 `deadlock-beltboxes-loaders-CN`。其它模组里针对旧名字的条件判断（例如 `if mods["deadlock-beltboxes-loaders"] then`）不会生效；调用全局 `deadlock` API 的模组不受影响。旧名字的整合需要上游或整合模组自行兼容。
+
+**已知限制**：传送带重贴图与地图重新配色两个选项尚未实现。
+
+---
+
+## 6. 安装与存档
+
+* 在 Mod Portal 订阅，或下载 zip 放进 `%APPDATA%\Factorio\mods\`；
+* 需要 Factorio 2.0；Space Age 与 Bob's Logistics 都是可选的；
+* **已有存档可以直接继续**：本分支沿用上游的原型名，装卸机、堆叠机、堆叠物品与科技名称都没有变化；第一次加载会提示模组版本变化，这是正常的；
+* 从上游 2.5.x / 2.6.0 切换过来时，存档里的机器与物品同样有效（会提示模组列表变化）。更早的 Deadlock's Stacking / Compact Loaders 独立模组，请先按上游说明迁移；
+* 更新后如果发现配方或科技没解锁，重新加载一次存档即可——`on_configuration_changed` 会给已研究的科技补解锁；
+* 不建议在已有存档里修改「堆叠比例」，已有的堆叠物品与配方会对不上。
+
+---
+
+## 7. 版本历史
+
+完整的更新记录见 [changelog.txt](changelog.txt)。
+
+| 版本 | 主要变化 |
+| --- | --- |
+| 2.8.2 | 堆叠机开关拆成「生成堆叠机」与「生成堆叠物品」两项 |
+| 2.8.1 | 堆叠装卸机改用独立物品子组，单独占一行 |
+| 2.8.0 | 新增堆叠装卸机（需要太空时代）与相关设置、API 字段 |
+| 2.7.0 | 首个 CN 发行版：Bob's Logistics 支持、廉价升级配方、完整简体中文 |
+| 2.6.3 | 改为独立模组名 `deadlock-beltboxes-loaders-CN` |
+| 2.6.2 | 内置简体中文本地化 |
+| 2.6.1 | 新增 Bob's Logistics 传送带等级支持 |
+| 2.6.0 | 修正 T4 配方，支持在铸造厂制造 |
+| 2.5.0 | 适配 Factorio 2.0 与太空时代 |
+
+---
+
+## 8. 模组开发
+
+* **API 文档**：[API.md](API.md)。包含 `add_stack()`、`add_tier()`、`destroy_stack()`、`update_stack_loaders()` 等函数的完整说明与示例。
+* **本分支新增的 API**（2.8.0）：`add_tier()` 支持 `stack_loader`、`stack_loader_item`、`stack_loader_localised_name` 三个字段；新增 `deadlock.update_stack_loaders()`，供在数据阶段末尾才创建等级的模组补做解锁与升级链。
+* **打包与发布**：推送 master 后，[.github/workflows/](.github/workflows/) 会自动打包 zip、发布到 Mod Portal，并在 GitHub 创建 Release。手动打包脚本见 [API.md](API.md) 附录。
+
+代码结构：
+
+| 路径 | 作用 |
+| --- | --- |
+| [data.lua](data.lua) | 创建原版各档，初始化 API |
+| [data-updates.lua](data-updates.lua) | Bob's Logistics 各档、原版堆叠物品、补做解锁与升级链 |
+| [data-final-fixes.lua](data-final-fixes.lua) | 延迟创建的堆叠装卸机、堆叠物品属性更新、给角色加 `unstacking` 分类 |
+| [prototypes/shared.lua](prototypes/shared.lua) | 共享常量、日志与子组定义 |
+| [prototypes/create_beltbox.lua](prototypes/create_beltbox.lua) | 堆叠机实体、物品、配方与科技 |
+| [prototypes/create_loader.lua](prototypes/create_loader.lua) | 装卸机与堆叠装卸机 |
+| [prototypes/create_stack.lua](prototypes/create_stack.lua) | 堆叠物品与堆叠/平分解压配方 |
+| [prototypes/public.lua](prototypes/public.lua) | 全局 `deadlock` API |
+| [prototypes/vanilla_tiers.lua](prototypes/vanilla_tiers.lua) | 原版与太空时代各档 |
+| [prototypes/bob_tiers.lua](prototypes/bob_tiers.lua) | Bob's Logistics 各档与配方定价 |
+| [prototypes/vanilla_stacks.lua](prototypes/vanilla_stacks.lua) | 原版可压缩物品清单 |
+| [settings.lua](settings.lua) | 全部设置项 |
+| [control.lua](control.lua) | 放置吸附、自动拆堆、配置变更补解锁 |
+
+---
+
+## 9. 常见问题
+
+**为什么没有堆叠机 / 压缩配方？**<br>
+先确认「生成堆叠机」「生成堆叠物品」两个启动设置（默认都开），再确认已研究对应物流科技与堆叠科技。改动启动设置后需要重启游戏。
+
+**为什么堆叠物品不能拿来造东西？**<br>
+它是独立物品，所有普通配方只认基础物品。先平分解压，或打开「自动平分解压」。
+
+**为什么压缩之后，箱子/车厢的容量没变？**<br>
+堆叠物品的堆叠数按比例缩小了，一格仍然装同样多的基础物品。它优化的是传送带占用，不是库存容量。
+
+**为什么没有涡轮档 / 堆叠装卸机？**<br>
+它们需要太空时代。堆叠装卸机还需要先研究太空时代的「堆叠机械臂」科技。
+
+**为什么没有基础档 / 终极档？**<br>
+它们来自 Bob's Logistics；基础档还要求 Bob 的「基础传送带」存在。
+
+**更新模组后配方或科技不见了？**<br>
+重新加载存档，`on_configuration_changed` 会为已研究的科技补解锁；仍然缺失的话，检查 Factorio 日志里 `DBL:` 开头的警告。
+
+**可以中途改堆叠比例吗？**<br>
+不建议。已有的堆叠物品、配方与库存会对不上；新开存档最稳妥。
+
+---
+
+## 10. 鸣谢与许可
+
+* 概念、美术与最初作者：[Deadlock989](https://mods.factorio.com/user/deadlock989)；
+* 由 [shanemadden](https://mods.factorio.com/user/shanemadden) 维护，MasterBuilder 亦有贡献；
+* 中文分支（Bob's Logistics 支持、堆叠装卸机与简体中文）由 tang-bai 维护；
+* 日语、法语、意大利语、俄语翻译来自上游贡献者。
+
+本模组以 **GPL-3.0 或更高版本** 发布，见 [LICENSE](LICENSE)。
+
+反馈问题：本仓库 [Issues](https://github.com/tang-bai/factorio-deadlock-beltboxes-loaders/issues)，或上游 [Factorio 论坛帖](https://forums.factorio.com/viewtopic.php?f=94&t=57264)。附上错误信息、日志和复现步骤会快很多。
+
+---
+
+<sub>本 README 面向玩家；模组作者请转到 [API.md](API.md)。上游英文说明保留在 [README.en.md](README.en.md)，Mod Portal 简介见 [description.md](description.md)。</sub>
