@@ -12,6 +12,13 @@ Deadlock 的堆叠机与紧凑装卸机（DSB）
 
 这里只说明本仓库相对上游 [shanemadden/factorio-deadlock-beltboxes-loaders](https://github.com/shanemadden/factorio-deadlock-beltboxes-loaders) 的改动。
 
+版本 2.8.1：堆叠装卸机单独一行
+------
+
+* 堆叠装卸机改用**独立的物品子组** `stack-loaders`（物流分组内顺序：装卸机 → 堆叠装卸机 → 堆叠机）。制作菜单与物品栏按子组分行，所以各档堆叠装卸机会整齐地排在自己那一行，不再和普通装卸机交替出现。
+* 新的子组在 [locale/zh-CN](locale/zh-CN/deadlock-beltboxes-loaders.cfg) / [locale/en](locale/en/deadlock-beltboxes-loaders.cfg) 里有 `[item-subgroup-name]` 显示名（堆叠装卸机 / Stack loaders）。
+* 只改了物品与配方的 `subgroup` 字段，原型名、配方、解锁科技都没有变化，存档可以直接继续用。
+
 版本 2.8.0：堆叠装卸机
 ------
 

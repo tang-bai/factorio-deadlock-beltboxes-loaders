@@ -84,6 +84,19 @@ if not data.raw["item-subgroup"]["beltboxes"] then
 	})
 end
 
+-- the stacking loaders live in their own subgroup, so they line up in their own row in the
+-- crafting menu / item list instead of being mixed in with the plain loaders
+if not data.raw["item-subgroup"]["stack-loaders"] then
+	data:extend({
+		{
+			type = "item-subgroup",
+			name = "stack-loaders",
+			group = "logistics",
+			order = "bb1",
+		},
+	})
+end
+
 -- make a subgroup at the bottom of each crafting tab
 for _, group in pairs(data.raw["item-group"]) do
 	data:extend({

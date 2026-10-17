@@ -205,7 +205,7 @@ local function create_loader_item(tier_table, is_stack)
 		flags = {},
 		place_result = is_stack and tier_table.stack_loader or tier_table.loader,
 		group = "logistics",
-		subgroup = "loaders",
+		subgroup = is_stack and "stack-loaders" or "loaders",
 		order = string.format("a%s%s", (tier_table.order or tier_table.loader), is_stack and "-deadlock-stack-loader" or "-deadlock-loader"),
 	}
 	if is_stack then
@@ -225,7 +225,7 @@ local function create_loader_recipe(tier_table, is_stack)
 			localised_description = {"entity-description.deadlock-stack-loader"},
 			category = "crafting",
 			group = "logistics",
-			subgroup = "loaders",
+			subgroup = "stack-loaders",
 			order = string.format("a%s%s", (tier_table.order or tier_table.loader), "-deadlock-stack-loader"),
 			enabled = false,
 			ingredients = {
